@@ -1,0 +1,64 @@
+﻿name:          clock
+version:       0.3
+stability:     stable
+synopsis:      High-resolution clock functions: realtime, monotonic, cputime
+description:   A package for convenient access to high-resolution
+               clock and timer functions of different operating
+               systems.
+               .
+               It is planned to consist of two layers. The lower
+               layer will provide direct access to OS-specific
+               clock and timer functions like clock_gettime of
+               Posix or GetTickCount of Windows and its upper
+               layer shall then provide a common API for all
+               supported systems. Currently only the lower level
+               is being developed.
+               .
+               .
+               POSIX reference: IEEE Std 1003.1-2008
+               <http://www.opengroup.org/onlinepubs/9699919799/>, 
+               <http://www.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html#>
+               .
+               WINDOWS reference: ...
+               .
+               For more information, see:
+               <http://corsis.sourceforge.net/index.php/Haskell/Clock>
+               .
+               [Version Scheme]
+               Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
+               .
+               * @PackagingOnly@ changes are made for quality assurance reasons.
+
+copyright:     Copyright © Cetin Sert 2009-2012, Eugene Kirpichov 2010
+license:       BSD3
+license-file:  LICENSE
+author:        Cetin Sert <fusion@corsis.eu>, Corsis Research; Eugene Kirpichov <ekirpichov@gmail.com>
+maintainer:    Cetin Sert <fusion@corsis.eu>, Corsis Research
+homepage:      http://corsis.github.com/clock/
+bug-reports:   http://corsis.github.com/clock/issues
+category:      System
+build-type:    Simple
+cabal-version: >= 1.6
+
+
+source-repository head
+    type:      git
+    location:  git://github.com/corsis/clock.git
+
+
+flag llvm
+    description: compile via LLVM
+    default    : False
+
+
+library
+    build-depends:       base >= 2 && <= 5
+    exposed-modules:     System.Clock
+    extensions:          ForeignFunctionInterface ScopedTypeVariables
+    c-sources:           csec/clock.c
+    include-dirs:        csec
+    install-includes:    clock.h
+    ghc-options:         -O2 -Wall
+    
+    if flag(llvm)
+      ghc-options:       -fllvm -optlo-O3
