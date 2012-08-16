@@ -1,4 +1,4 @@
-﻿-- | High-resolution, realtime clock and timer functions for Posix
+-- | High-resolution, realtime clock and timer functions for Posix
 --   systems. This module is being developed according to IEEE Std
 --   1003.1-2008: <http://www.opengroup.org/onlinepubs/9699919799/>,
 --   <http://www.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html#>

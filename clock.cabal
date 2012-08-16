@@ -1,4 +1,4 @@
-﻿name:          clock
+name:          clock
 version:       0.3
 stability:     stable
 synopsis:      High-resolution clock functions: realtime, monotonic, cputime
