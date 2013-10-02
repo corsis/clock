@@ -119,16 +119,42 @@ void clock_readres_threadtime(long* t)
 // ***********************
 
 #include <time.h>
+#ifdef __MACH__
+  #include <mach/clock.h>
+  #include <mach/mach.h>
+  #define CLOCK_ID_T clock_id_t
+  #define CLOCK_MONOTONIC SYSTEM_CLOCK
+  #define CLOCK_REALTIME CALENDAR_CLOCK
+  #define CLOCK_PROCESS_CPUTIME_ID SYSTEM_CLOCK
+  #define CLOCK_THREAD_CPUTIME_ID SYSTEM_CLOCK
+#else
+  #define CLOCK_ID_T clockid_t
+#endif
 
 // due to missing define in FreeBSD 9.0 and 9.1 (http://lists.freebsd.org/pipermail/freebsd-stable/2013-September/075095.html)
 #ifndef CLOCK_PROCESS_CPUTIME_ID
   #define CLOCK_PROCESS_CPUTIME_ID 15
 #endif
 
-void time_(clockid_t clock, long* t)
+void time_(CLOCK_ID_T clock, long* t)
 {
+  #ifdef __MACH__
+    // OS X does not have clock_gettime, use clock_get_time
+    // see http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    struct timespec* ts;
+    host_get_clock_service(mach_host_self(), clock, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    ts = (struct timespec*)t;
+    ts->tv_sec = mts.tv_sec;
+    ts->tv_nsec = mts.tv_nsec;
+  #else
+    clock_gettime(clock, (struct timespec*)t);
+  #endif
 
-  clock_gettime(clock, (struct timespec*)t);
+
 
 /*struct timespec a;
 
@@ -160,10 +186,18 @@ void clock_readtime_threadtime(long* t)
 }
 
 
-void res_(clockid_t clock, long* t)
+void res_(CLOCK_ID_T clock, long* t)
 {
-
-  clock_getres(clock, (struct timespec*)t);
+  #ifdef __MACH__
+    clock_serv_t cclock;
+    int nsecs;
+    mach_msg_type_number_t count;
+    host_get_clock_service(mach_host_self(), clock, &cclock);
+    clock_get_attributes(cclock, CLOCK_GET_TIME_RES, (clock_attr_t)&nsecs, &count);
+    mach_port_deallocate(mach_task_self(), cclock);
+  #else
+    clock_getres(clock, (struct timespec*)t);
+  #endif
 
 /*struct timespec a;
 
