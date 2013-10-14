@@ -120,6 +120,11 @@ void clock_readres_threadtime(long* t)
 
 #include <time.h>
 
+// due to missing define in FreeBSD 9.0 and 9.1 (http://lists.freebsd.org/pipermail/freebsd-stable/2013-September/075095.html)
+#ifndef CLOCK_PROCESS_CPUTIME_ID
+  #define CLOCK_PROCESS_CPUTIME_ID 15
+#endif
+
 void time_(clockid_t clock, long* t)
 {
 
