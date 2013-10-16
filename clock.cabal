@@ -1,25 +1,29 @@
 name:          clock
-version:       0.3
+version:       0.4
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
-               timer functions of different operating systems.
+               timer functions of different operating systems via a unified API.
                .
-               POSIX layer was developed by Cetin Sert in 2009.
+               POSIX code and surface API was developed by Cetin Sert in 2009.
                .
-               Windows layer was contributed by Eugene Kirpichov in 2010.
+               Windows code was contributed by Eugene Kirpichov in 2010.
                .
-               Both layers share the same surface API.
+               FreeBSD code was contributed by Finn Espen Gundersen on 2013-10-14.
+               .
+               OS X code was contributed by Gerolf Seitz on 2013-10-15.
+               .
+               All code exposes the same surface API.
                .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2012, Eugene Kirpichov 2010
+copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen & Gerolf Seitz 2013
 license:       BSD3
 license-file:  LICENSE
-author:        Cetin Sert <cetin@corsis.eu>, Corsis Research; Eugene Kirpichov <ekirpichov@gmail.com>
+author:        Cetin Sert <cetin@corsis.eu>, Corsis Research
 maintainer:    Cetin Sert <cetin@corsis.eu>, Corsis Research
 homepage:      http://corsis.github.com/clock/
 bug-reports:   http://corsis.github.com/clock/issues
