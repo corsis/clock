@@ -13,14 +13,12 @@ description:   A package for convenient access to high-resolution clock and
                .
                OS X code was contributed by Gerolf Seitz on 2013-10-15.
                .
-               All code exposes the same surface API.
-               .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen & Gerolf Seitz 2013
+copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013
 license:       BSD3
 license-file:  LICENSE
 author:        Cetin Sert <cetin@corsis.eu>, Corsis Research
