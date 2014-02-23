@@ -31,17 +31,9 @@ data Clock = Monotonic      -- ^ The identifier for the system-wide monotonic cl
            | ThreadCPUTime  -- ^ The identifier of the CPU-time clock associated with the calling OS thread. For this clock, the value returned by getTime represents the amount of execution time of the current OS thread.
 
 -- | TimeSpec structure
-data TimeSpec = TimeSpec {-# UNPACK #-} !Int  -- seconds
-                         {-# UNPACK #-} !Int  -- nanoseconds
-                         deriving (Show, Read, Eq)
-
--- | Gets     seconds of a timespec value.
-sec  :: TimeSpec -> Int
--- | Gets nanoseconds of a timespec value.
-nsec :: TimeSpec -> Int
-
-sec  (TimeSpec s _) = s
-nsec (TimeSpec _ n) = n
+data TimeSpec = TimeSpec { sec  :: {-# UNPACK #-} !Int, -- ^ seconds
+                           nsec :: {-# UNPACK #-} !Int  -- ^ nanoseconds
+                         } deriving (Show, Read, Eq)
 
 instance Storable TimeSpec where
   sizeOf    _ = sizeOf (0 :: Int) * 2
