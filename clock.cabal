@@ -43,7 +43,7 @@ flag llvm
 library
     build-depends:       base >= 2 && <= 5
     exposed-modules:     System.Clock
-    extensions:          ForeignFunctionInterface ScopedTypeVariables
+    extensions:          DeriveGeneric DeriveDataTypeable ForeignFunctionInterface ScopedTypeVariables
     c-sources:           csec/clock.c
     include-dirs:        csec
     install-includes:    clock.h
