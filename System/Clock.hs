@@ -20,6 +20,8 @@ import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal.Alloc
 import Control.Applicative
+import Data.Typeable (Typeable)
+import GHC.Generics (Generic)
 
 -- | Clock types.
 --   A clock may be system-wide (that is, visible to all processes)
@@ -33,7 +35,7 @@ data Clock = Monotonic      -- ^ The identifier for the system-wide monotonic cl
 -- | TimeSpec structure
 data TimeSpec = TimeSpec { sec  :: {-# UNPACK #-} !Int, -- ^ seconds
                            nsec :: {-# UNPACK #-} !Int  -- ^ nanoseconds
-                         } deriving (Show, Read, Eq)
+                         } deriving (Eq, Generic, Read, Show, Typeable)
 
 instance Storable TimeSpec where
   sizeOf    _ = sizeOf (0 :: Int) * 2
