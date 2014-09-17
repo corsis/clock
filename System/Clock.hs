@@ -31,6 +31,7 @@ data Clock = Monotonic      -- ^ The identifier for the system-wide monotonic cl
            | Realtime       -- ^ The identifier of the system-wide clock measuring real time. For this clock, the value returned by getTime represents the amount of time (in seconds and nanoseconds) since the Epoch.
            | ProcessCPUTime -- ^ The identifier of the CPU-time clock associated with the calling process. For this clock, the value returned by getTime represents the amount of execution time of the current process.
            | ThreadCPUTime  -- ^ The identifier of the CPU-time clock associated with the calling OS thread. For this clock, the value returned by getTime represents the amount of execution time of the current OS thread.
+           deriving (Eq, Enum, Generic, Read, Show, Typeable)
 
 -- | TimeSpec structure
 data TimeSpec = TimeSpec { sec  :: {-# UNPACK #-} !Int, -- ^ seconds
