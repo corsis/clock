@@ -55,9 +55,5 @@ library
     install-includes:    clock.h
     ghc-options:         -O2 -Wall
 
-    if impl(ghc < 7.6)
-      build-depends:
-        ghc-prim
-
     if flag(llvm)
       ghc-options:       -fllvm -optlo-O3
