@@ -1,5 +1,5 @@
 name:          clock
-version:       0.4.0.1
+version:       0.4.1.2
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -13,12 +13,16 @@ description:   A package for convenient access to high-resolution clock and
                .
                OS X code was contributed by Gerolf Seitz on 2013-10-15.
                .
+               Derived @Generic@, @Typeable@ and other instances for @Clock@ and @TimeSpec@ was contributed by Mathieu Boespflug on 2014-09-17.
+               .
+               Corrected dependency listing for @GHC < 7.6@ was contributed by Brian McKenna on 2014-09-30.
+               .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013
+copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014
 license:       BSD3
 license-file:  LICENSE
 author:        Cetin Sert <cetin@corsis.eu>, Corsis Research
@@ -41,6 +45,8 @@ flag llvm
 
 
 library
+  if impl (ghc < 7.6)
+    build-depends:       base >= 2 && <= 5, ghc-prim
     build-depends:       base >= 2 && <= 5
     exposed-modules:     System.Clock
     extensions:          DeriveGeneric DeriveDataTypeable ForeignFunctionInterface ScopedTypeVariables
