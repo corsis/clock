@@ -45,8 +45,8 @@ flag llvm
 
 
 library
-  if impl (ghc < 7.6)
-    build-depends:       base >= 2 && <= 5, ghc-prim
+    if impl (ghc < 7.6)
+      build-depends:       base >= 2 && <= 5, ghc-prim
     build-depends:       base >= 2 && <= 5
     exposed-modules:     System.Clock
     extensions:          DeriveGeneric DeriveDataTypeable ForeignFunctionInterface ScopedTypeVariables
