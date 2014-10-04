@@ -19,7 +19,19 @@ import Control.Applicative
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
-#include <time.h>
+#if defined(_WIN32)
+#  include "hs_clock_win32.c"
+#elif defined(__MACH__)
+#  include "hs_clock_darwin.c"
+#else
+#  include <time.h>
+-- Due to missing define in FreeBSD 9.0 and 9.1
+-- (http://lists.freebsd.org/pipermail/freebsd-stable/2013-September/075095.html).
+#  ifndef CLOCK_PROCESS_CPUTIME_ID
+#    define CLOCK_PROCESS_CPUTIME_ID 15
+#  endif
+#endif
+
 #let alignment t = "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__)
 
 -- | Clock types. A clock may be system-wide (that is, visible to all processes)
@@ -52,12 +64,79 @@ data Clock
   | ThreadCPUTime
   deriving (Eq, Enum, Generic, Read, Show, Typeable)
 
+#if defined(_WIN32)
+foreign import ccall hs_clock_win32_gettime_monotonic :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_gettime_realtime :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_gettime_processtime :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_gettime_threadtime :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_getres_monotonic :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_getres_realtime :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_getres_processtime :: Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
+#elif defined(__MACH__)
+foreign import ccall hs_clock_darwin_gettime :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
+foreign import ccall hs_clock_darwin_getres  :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
+#else
+foreign import ccall clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
+foreign import ccall clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
+#endif
+
+#if defined(_WIN32)
+#elif defined(__MACH__)
+clockToConst :: Clock -> #{type clock_id_t}
+clockToConst Monotonic = #const SYSTEM_CLOCK
+clockToConst Realtime = #const CALENDAR_CLOCK
+clockToConst ProcessCPUTime = #const SYSTEM_CLOCK
+clockToConst ThreadCPUTime = #const SYSTEM_CLOCK
+#else
+clockToConst :: Clock -> #{type clockid_t}
+clockToConst Monotonic = #const CLOCK_MONOTONIC
+clockToConst Realtime = #const CLOCK_REALTIME
+clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
+clockToConst ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
+#endif
+
+allocaAndPeek :: Storable a => (Ptr a -> IO ()) -> IO a
+allocaAndPeek f = alloca $ \ptr -> f ptr >> peek ptr
+
+-- | The 'getTime' function shall return the current value for the
+--   specified clock.
+getTime :: Clock -> IO TimeSpec
+
+-- | The 'getRes' function shall return the resolution of any clock.
+--   Clock resolutions are implementation-defined and cannot be set
+--   by a process.
+getRes :: Clock -> IO TimeSpec
+
+#if defined(_WIN32)
+getTime Monotonic = allocaAndPeek hs_clock_win32_gettime_monotonic
+getTime Realtime = allocaAndPeek hs_clock_win32_gettime_realtime
+getTime ProcessCPUTime = allocaAndPeek hs_clock_win32_gettime_processtime
+getTime ThreadCPUTime = allocaAndPeek hs_clock_win32_gettime_threadtime
+#elif defined(__MACH__)
+getTime clk = allocaAndPeek $ hs_clock_darwin_gettime $ clockToConst clk
+#else
+getTime clk = allocaAndPeek $ clock_gettime $ clockToConst clk
+#endif
+
+#if defined(_WIN32)
+getRes Monotonic = allocaAndPeek hs_clock_win32_getres_monotonic
+getRes Realtime = allocaAndPeek hs_clock_win32_getres_realtime
+getRes ProcessCPUTime = allocaAndPeek hs_clock_win32_getres_processtime
+getRes ThreadCPUTime = allocaAndPeek hs_clock_win32_getres_threadtime
+#elif defined(__MACH__)
+getRes clk = allocaAndPeek $ hs_clock_darwin_getres $ clockToConst clk
+#else
+getRes clk = allocaAndPeek $ clock_getres $ clockToConst clk
+#endif
+
 -- | TimeSpec structure
 data TimeSpec = TimeSpec
   { sec  :: {-# UNPACK #-} !(#type long) -- ^ seconds
   , nsec :: {-# UNPACK #-} !(#type long) -- ^ nanoseconds
   } deriving (Eq, Generic, Read, Show, Typeable)
 
+#if defined(_WIN32)
 instance Storable TimeSpec where
   sizeOf _ = #{size long} * 2
   alignment _ = #alignment long
@@ -67,6 +146,17 @@ instance Storable TimeSpec where
   peek ts =
       TimeSpec <$> peekByteOff ts (0 * #size long)
                <*> peekByteOff ts (1 * #size long)
+#else
+instance Storable TimeSpec where
+  sizeOf _ = #{size struct timespec}
+  alignment _ = #alignment struct timespec
+  poke ts v = do
+      #{poke struct timespec, tv_sec} ts $! sec v
+      #{poke struct timespec, tv_nsec} ts $! nsec v
+  peek ts =
+      TimeSpec <$> #{peek struct timespec, tv_sec} ts
+               <*> #{peek struct timespec, tv_nsec} ts
+#endif
 
 normalize :: TimeSpec -> TimeSpec
 normalize (TimeSpec xs xn) =
@@ -99,47 +189,6 @@ instance Ord TimeSpec where
     where
       ordering = compare xs ys
 
--- | The 'getTime' function shall return the current value for the
---   specified clock.
-getTime :: Clock -> IO TimeSpec
-getTime clock = alloca $ \ptr -> time clock ptr >> peek ptr
-
--- | The 'getRes' function shall return the resolution of any clock.
---   Clock resolutions are implementation-defined and cannot be set
---   by a process.
-getRes :: Clock -> IO TimeSpec
-getRes clock = alloca $ \ptr -> res clock ptr >> peek ptr
-
 -- | Compute the absolute difference.
 diffTimeSpec :: TimeSpec -> TimeSpec -> TimeSpec
 diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
-
----------------------------------------------
-
--- Reader function
-type ReaderFunc = Ptr TimeSpec -> IO ()
-
--- Readers
-foreign import ccall clock_readtime_monotonic   :: ReaderFunc
-foreign import ccall clock_readtime_realtime    :: ReaderFunc
-foreign import ccall clock_readtime_processtime :: ReaderFunc
-foreign import ccall clock_readtime_threadtime  :: ReaderFunc
-
-foreign import ccall clock_readres_monotonic    :: ReaderFunc
-foreign import ccall clock_readres_realtime     :: ReaderFunc
-foreign import ccall clock_readres_processtime  :: ReaderFunc
-foreign import ccall clock_readres_threadtime   :: ReaderFunc
-
--- Clock-to-time reading
-time :: Clock -> ReaderFunc
-time Monotonic      = clock_readtime_monotonic
-time Realtime       = clock_readtime_realtime
-time ProcessCPUTime = clock_readtime_processtime
-time ThreadCPUTime  = clock_readtime_threadtime
-
--- Clock-to-res reading
-res :: Clock -> ReaderFunc
-res Monotonic      = clock_readres_monotonic
-res Realtime       = clock_readres_realtime
-res ProcessCPUTime = clock_readres_processtime
-res ThreadCPUTime  = clock_readres_threadtime
