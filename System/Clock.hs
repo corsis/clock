@@ -3,18 +3,12 @@
 --   1003.1-2008: <http://www.opengroup.org/onlinepubs/9699919799/>,
 --   <http://www.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html#>
 
-module System.Clock (
-
-  Clock    (Monotonic, Realtime, ProcessCPUTime, ThreadCPUTime),
-  TimeSpec (TimeSpec),
-
-  getTime,
-  getRes,
-
-  sec,
-  nsec
-
-) where
+module System.Clock
+  ( Clock(..)
+  , TimeSpec(..)
+  , getTime
+  , getRes
+  ) where
 
 import Foreign.Ptr
 import Foreign.Storable
