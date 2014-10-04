@@ -73,13 +73,13 @@ instance Ord TimeSpec where
 -- | The 'getTime' function shall return the current value for the
 --   specified clock.
 getTime :: Clock -> IO TimeSpec
-getTime = call . time
+getTime clock = alloca $ \ptr -> time clock ptr >> peek ptr
 
 -- | The 'getRes' function shall return the resolution of any clock.
 --   Clock resolutions are implementation-defined and cannot be set
 --   by a process.
 getRes :: Clock -> IO TimeSpec
-getRes = call . res
+getRes clock = alloca $ \ptr -> res clock ptr >> peek ptr
 
 ---------------------------------------------
 
@@ -110,12 +110,3 @@ res Monotonic      = clock_readres_monotonic
 res Realtime       = clock_readres_realtime
 res ProcessCPUTime = clock_readres_processtime
 res ThreadCPUTime  = clock_readres_threadtime
-
--- Marshalling
-call :: ReaderFunc -> IO TimeSpec
-call read_ = do
-  x <- malloc
-  read_     x
-  t <- peek x
-  free      x
-  return    t
