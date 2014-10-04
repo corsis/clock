@@ -54,8 +54,8 @@ library
                          ForeignFunctionInterface
                          ScopedTypeVariables
                          ViewPatterns
-    c-sources:           csec/clock.c
-    include-dirs:        csec
+    c-sources:           cbits/clock.c
+    include-dirs:        cbits
     install-includes:    clock.h
     ghc-options:         -O2 -Wall
 
