@@ -9,12 +9,12 @@
 
 #define DELTA_EPOCH_IN_100NS  U64(116444736000000000)
 
-long ticks_to_nanos(LONGLONG subsecond_time, LONGLONG frequency)
+static long ticks_to_nanos(LONGLONG subsecond_time, LONGLONG frequency)
 {
     return (long)((1e9 * subsecond_time) / frequency);
 }
 
-ULONGLONG to_quad_100ns(FILETIME ft)
+static ULONGLONG to_quad_100ns(FILETIME ft)
 {
     ULARGE_INTEGER li;
     li.LowPart = ft.dwLowDateTime;
@@ -22,7 +22,7 @@ ULONGLONG to_quad_100ns(FILETIME ft)
     return li.QuadPart;
 }
 
-void to_timespec_from_100ns(ULONGLONG t_100ns, long *t)
+static void to_timespec_from_100ns(ULONGLONG t_100ns, long *t)
 {
     t[0] = (long)(t_100ns / 10000000UL);
     t[1] = 100*(long)(t_100ns % 10000000UL);
