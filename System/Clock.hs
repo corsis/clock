@@ -17,15 +17,35 @@ import Control.Applicative
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
--- | Clock types.
---   A clock may be system-wide (that is, visible to all processes)
---   or per-process (measuring time that is meaningful only within
---   a process). All implementations shall support CLOCK_REALTIME.
-data Clock = Monotonic      -- ^ The identifier for the system-wide monotonic clock, which is defined as a clock measuring real time, whose value cannot be set via clock_settime and which cannot have negative clock jumps. The maximum possible clock jump shall be implementation-defined. For this clock, the value returned by 'getTime' represents the amount of time (in seconds and nanoseconds) since an unspecified point in the past (for example, system start-up time, or the Epoch). This point does not change after system start-up time. Note that the absolute value of the monotonic clock is meaningless (because its origin is arbitrary), and thus there is no need to set it. Furthermore, realtime applications can rely on the fact that the value of this clock is never set.
-           | Realtime       -- ^ The identifier of the system-wide clock measuring real time. For this clock, the value returned by getTime represents the amount of time (in seconds and nanoseconds) since the Epoch.
-           | ProcessCPUTime -- ^ The identifier of the CPU-time clock associated with the calling process. For this clock, the value returned by getTime represents the amount of execution time of the current process.
-           | ThreadCPUTime  -- ^ The identifier of the CPU-time clock associated with the calling OS thread. For this clock, the value returned by getTime represents the amount of execution time of the current OS thread.
-           deriving (Eq, Enum, Generic, Read, Show, Typeable)
+-- | Clock types. A clock may be system-wide (that is, visible to all processes)
+--   or per-process (measuring time that is meaningful only within a process).
+--   All implementations shall support CLOCK_REALTIME.
+data Clock
+    -- | The identifier for the system-wide monotonic clock, which is defined as
+    --   a clock measuring real time, whose value cannot be set via
+    --   @clock_settime@ and which cannot have negative clock jumps. The maximum
+    --   possible clock jump shall be implementation defined. For this clock,
+    --   the value returned by 'getTime' represents the amount of time (in
+    --   seconds and nanoseconds) since an unspecified point in the past (for
+    --   example, system start-up time, or the Epoch). This point does not
+    --   change after system start-up time. Note that the absolute value of the
+    --   monotonic clock is meaningless (because its origin is arbitrary), and
+    --   thus there is no need to set it. Furthermore, realtime applications can
+    --   rely on the fact that the value of this clock is never set.
+  = Monotonic
+    -- | The identifier of the system-wide clock measuring real time. For this
+    --   clock, the value returned by getTime represents the amount of time (in
+    --   seconds and nanoseconds) since the Epoch.
+  | Realtime
+    -- | The identifier of the CPU-time clock associated with the calling
+    --   process. For this clock, the value returned by getTime represents the
+    --   amount of execution time of the current process.
+  | ProcessCPUTime
+  -- | The identifier of the CPU-time clock associated with the calling OS
+  --   thread. For this clock, the value returned by getTime represents the
+  --   amount of execution time of the current OS thread.
+  | ThreadCPUTime
+  deriving (Eq, Enum, Generic, Read, Show, Typeable)
 
 -- | TimeSpec structure
 data TimeSpec = TimeSpec { sec  :: {-# UNPACK #-} !Int, -- ^ seconds
