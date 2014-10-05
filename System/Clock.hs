@@ -8,6 +8,7 @@ module System.Clock
   , TimeSpec(..)
   , getTime
   , getRes
+  , diffTimeSpec
   ) where
 
 import Foreign.Ptr
@@ -85,6 +86,10 @@ getTime = call . time
 --   by a process.
 getRes :: Clock -> IO TimeSpec
 getRes = call . res
+
+-- | Compute the absolute difference.
+diffTimeSpec :: TimeSpec -> TimeSpec -> TimeSpec
+diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
 
 ---------------------------------------------
 
