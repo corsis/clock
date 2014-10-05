@@ -43,6 +43,30 @@ instance Storable TimeSpec where
     let i :: Ptr Int = castPtr t
     TimeSpec <$> i |. 0 <*> i |. 1
 
+normalize :: TimeSpec -> TimeSpec
+normalize (TimeSpec xs xn) =
+    let (q, r) = xn `divMod` (10^9)
+    in TimeSpec (xs + q) r
+
+instance Num TimeSpec where
+  (TimeSpec xs xn) + (TimeSpec ys yn) =
+      normalize $ TimeSpec (xs + ys) (xn + yn)
+  (TimeSpec xs xn) - (TimeSpec ys yn) =
+      normalize $ TimeSpec (xs - ys) (xn - yn)
+  (TimeSpec xs xn) * (TimeSpec ys yn) =
+      normalize $ TimeSpec (xs * ys) (xn * yn)
+  negate (TimeSpec xs xn) =
+      normalize $ TimeSpec (negate xs) (negate xn)
+  abs (TimeSpec xs xn) =
+      normalize $ TimeSpec (abs xs) (signum xs * xn)
+  signum (normalize -> TimeSpec xs yn)
+    | signum xs == 0 = TimeSpec 0 (signum yn)
+    | otherwise = TimeSpec 0 (signum xs)
+  fromInteger x =
+      -- For range, compute div, mod over integers, not any bounded type.
+      let (q, r) = x `divMod` (10^9)
+      in TimeSpec (fromInteger q) (fromInteger r)
+
 instance Ord TimeSpec where
   compare (TimeSpec xs xn) (TimeSpec ys yn) = 
     if      xs > ys then GT

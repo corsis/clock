@@ -53,6 +53,7 @@ library
                          DeriveDataTypeable
                          ForeignFunctionInterface
                          ScopedTypeVariables
+                         ViewPatterns
     c-sources:           csec/clock.c
     include-dirs:        csec
     install-includes:    clock.h
