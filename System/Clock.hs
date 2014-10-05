@@ -8,6 +8,7 @@ module System.Clock
   , TimeSpec(..)
   , getTime
   , getRes
+  , diffTimeSpec
   ) where
 
 import Foreign.Ptr
@@ -63,6 +64,30 @@ instance Storable TimeSpec where
     let i :: Ptr Int = castPtr t
     TimeSpec <$> peekElemOff i 0 <*> peekElemOff i 1
 
+normalize :: TimeSpec -> TimeSpec
+normalize (TimeSpec xs xn) =
+    let (q, r) = xn `divMod` (10^9)
+    in TimeSpec (xs + q) r
+
+instance Num TimeSpec where
+  (TimeSpec xs xn) + (TimeSpec ys yn) =
+      normalize $ TimeSpec (xs + ys) (xn + yn)
+  (TimeSpec xs xn) - (TimeSpec ys yn) =
+      normalize $ TimeSpec (xs - ys) (xn - yn)
+  (TimeSpec xs xn) * (TimeSpec ys yn) =
+      normalize $ TimeSpec (xs * ys) (xn * yn)
+  negate (TimeSpec xs xn) =
+      normalize $ TimeSpec (negate xs) (negate xn)
+  abs (TimeSpec xs xn) =
+      normalize $ TimeSpec (abs xs) (signum xs * xn)
+  signum (normalize -> TimeSpec xs yn)
+    | signum xs == 0 = TimeSpec 0 (signum yn)
+    | otherwise = TimeSpec 0 (signum xs)
+  fromInteger x =
+      -- For range, compute div, mod over integers, not any bounded type.
+      let (q, r) = x `divMod` (10^9)
+      in TimeSpec (fromInteger q) (fromInteger r)
+
 instance Ord TimeSpec where
   compare (TimeSpec xs xn) (TimeSpec ys yn)
     | EQ == ordering = compare xn yn
@@ -80,6 +105,10 @@ getTime clock = alloca $ \ptr -> time clock ptr >> peek ptr
 --   by a process.
 getRes :: Clock -> IO TimeSpec
 getRes clock = alloca $ \ptr -> res clock ptr >> peek ptr
+
+-- | Compute the absolute difference.
+diffTimeSpec :: TimeSpec -> TimeSpec -> TimeSpec
+diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
 
 ---------------------------------------------
 
