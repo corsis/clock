@@ -132,30 +132,36 @@ getRes clk = allocaAndPeek $ clock_getres $ clockToConst clk
 
 -- | TimeSpec structure
 data TimeSpec = TimeSpec
-  { sec  :: {-# UNPACK #-} !(#type long) -- ^ seconds
-  , nsec :: {-# UNPACK #-} !(#type long) -- ^ nanoseconds
+  { sec  :: {-# UNPACK #-} !Int64 -- ^ seconds
+  , nsec :: {-# UNPACK #-} !Int64 -- ^ nanoseconds
   } deriving (Eq, Generic, Read, Show, Typeable)
 
 #if defined(_WIN32)
 instance Storable TimeSpec where
   sizeOf _ = #{size long} * 2
-  alignment _ = #alignment long
-  poke ts v = do
-      pokeByteOff ts (0 * #size long) $! sec v
-      pokeByteOff ts (1 * #size long) $! nsec v
-  peek ts =
-      TimeSpec <$> peekByteOff ts (0 * #size long)
-               <*> peekByteOff ts (1 * #size long)
+  alignment _ = #{alignment long}
+  poke ptr ts = do
+      let xs :: #{type long} = fromIntegral $ sec ts
+          xn :: #{type long} = fromIntegral $ nsec ts
+      pokeByteOff ptr (0 * #size long) xs
+      pokeByteOff ptr (1 * #size long) xn
+  peek ptr = do
+      xs :: #{type time_t} <- peekByteOff ptr (0 * #size long)
+      xn :: #{type long} <- peekByteOff ptr (1 * #size long)
+      return $ TimeSpec xs xn
 #else
 instance Storable TimeSpec where
   sizeOf _ = #{size struct timespec}
-  alignment _ = #alignment struct timespec
-  poke ts v = do
-      #{poke struct timespec, tv_sec} ts $! sec v
-      #{poke struct timespec, tv_nsec} ts $! nsec v
-  peek ts =
-      TimeSpec <$> #{peek struct timespec, tv_sec} ts
-               <*> #{peek struct timespec, tv_nsec} ts
+  alignment _ = #{alignment struct timespec}
+  poke ptr ts = do
+      let xs :: #{type time_t} = fromIntegral $ sec ts
+          xn :: #{type long} = fromIntegral $ nsec ts
+      #{poke struct timespec, tv_sec} ptr (xs)
+      #{poke struct timespec, tv_nsec} ptr (xn)
+  peek ptr = do
+      xs :: #{type time_t} <- #{peek struct timespec, tv_sec} ptr
+      xn :: #{type long} <- #{peek struct timespec, tv_nsec} ptr
+      return $ TimeSpec (fromIntegral xs) (fromIntegral xn)
 #endif
 
 normalize :: TimeSpec -> TimeSpec
