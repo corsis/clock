@@ -3,6 +3,8 @@
 --   1003.1-2008: <http://www.opengroup.org/onlinepubs/9699919799/>,
 --   <http://www.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html#>
 
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
+
 module System.Clock
   ( Clock(..)
   , TimeSpec(..)
@@ -15,7 +17,6 @@ import Data.Int
 import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal.Alloc
-import Control.Applicative
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
