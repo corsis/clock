@@ -54,9 +54,11 @@ library
                          ForeignFunctionInterface
                          ScopedTypeVariables
                          ViewPatterns
-    c-sources:           cbits/clock.c
+    if os(darwin)
+      c-sources:         cbits/hs_clock_darwin.c
+    if os(windows)
+      c-sources:         cbits/hs_clock_win32.c
     include-dirs:        cbits
-    install-includes:    clock.h
     ghc-options:         -O2 -Wall
 
     if flag(llvm)
