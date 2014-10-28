@@ -11,12 +11,16 @@ module System.Clock
   , diffTimeSpec
   ) where
 
+import Data.Int
 import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal.Alloc
 import Control.Applicative
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
+
+#include <time.h>
+#let alignment t = "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__)
 
 -- | Clock types. A clock may be system-wide (that is, visible to all processes)
 --   or per-process (measuring time that is meaningful only within a process).
@@ -49,20 +53,20 @@ data Clock
   deriving (Eq, Enum, Generic, Read, Show, Typeable)
 
 -- | TimeSpec structure
-data TimeSpec = TimeSpec { sec  :: {-# UNPACK #-} !Int, -- ^ seconds
-                           nsec :: {-# UNPACK #-} !Int  -- ^ nanoseconds
-                         } deriving (Eq, Generic, Read, Show, Typeable)
+data TimeSpec = TimeSpec
+  { sec  :: {-# UNPACK #-} !(#type long) -- ^ seconds
+  , nsec :: {-# UNPACK #-} !(#type long) -- ^ nanoseconds
+  } deriving (Eq, Generic, Read, Show, Typeable)
 
 instance Storable TimeSpec where
-  sizeOf    _ = sizeOf (0 :: Int) * 2
-  alignment _ = 1
-  poke t v    = do
-    let i :: Ptr Int = castPtr t
-    pokeElemOff i 0 $! sec v
-    pokeElemOff i 1 $! nsec v
-  peek t      = do
-    let i :: Ptr Int = castPtr t
-    TimeSpec <$> peekElemOff i 0 <*> peekElemOff i 1
+  sizeOf _ = #{size long} * 2
+  alignment _ = #alignment long
+  poke ts v = do
+      pokeByteOff ts (0 * #size long) $! sec v
+      pokeByteOff ts (1 * #size long) $! nsec v
+  peek ts =
+      TimeSpec <$> peekByteOff ts (0 * #size long)
+               <*> peekByteOff ts (1 * #size long)
 
 normalize :: TimeSpec -> TimeSpec
 normalize (TimeSpec xs xn) =
