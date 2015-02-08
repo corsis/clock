@@ -13,11 +13,12 @@ module System.Clock
   , diffTimeSpec
   ) where
 
+import Control.Applicative
 import Data.Int
+import Data.Typeable (Typeable)
 import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal.Alloc
-import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 
 #if defined(_WIN32)
@@ -139,17 +140,15 @@ data TimeSpec = TimeSpec
 
 #if defined(_WIN32)
 instance Storable TimeSpec where
-  sizeOf _ = #{size long} * 2
-  alignment _ = #{alignment long}
+  sizeOf _ = sizeOf (undefined :: Int64) * 2
+  alignment _ = alignment (undefined :: Int64)
   poke ptr ts = do
-      let xs :: #{type long} = fromIntegral $ sec ts
-          xn :: #{type long} = fromIntegral $ nsec ts
-      pokeByteOff ptr (0 * #size long) xs
-      pokeByteOff ptr (1 * #size long) xn
+      pokeByteOff ptr 0 (sec ts)
+      pokeByteOff ptr (sizeOf (undefined :: Int64)) (nsec ts)
   peek ptr = do
-      xs :: #{type time_t} <- peekByteOff ptr (0 * #size long)
-      xn :: #{type long} <- peekByteOff ptr (1 * #size long)
-      return $ TimeSpec xs xn
+      TimeSpec
+        <$> peekByteOff ptr 0
+        <*> peekByteOff ptr (sizeOf (undefined :: Int64))
 #else
 instance Storable TimeSpec where
   sizeOf _ = #{size struct timespec}
