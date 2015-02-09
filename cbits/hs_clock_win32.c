@@ -22,13 +22,13 @@ static ULONGLONG to_quad_100ns(FILETIME ft)
     return li.QuadPart;
 }
 
-static void to_timespec_from_100ns(ULONGLONG t_100ns, long *t)
+static void to_timespec_from_100ns(ULONGLONG t_100ns, long long *t)
 {
     t[0] = (long)(t_100ns / 10000000UL);
     t[1] = 100*(long)(t_100ns % 10000000UL);
 }
 
-void hs_clock_win32_gettime_monotonic(long* t)
+void hs_clock_win32_gettime_monotonic(long long* t)
 {
    LARGE_INTEGER time;
    LARGE_INTEGER frequency;
@@ -40,7 +40,7 @@ void hs_clock_win32_gettime_monotonic(long* t)
    t[1] = ticks_to_nanos(time.QuadPart % frequency.QuadPart, frequency.QuadPart);
 }
 
-void hs_clock_win32_gettime_realtime(long* t)
+void hs_clock_win32_gettime_realtime(long long* t)
 {
     FILETIME ft;
     ULONGLONG tmp;
@@ -53,7 +53,7 @@ void hs_clock_win32_gettime_realtime(long* t)
     to_timespec_from_100ns(tmp, t);
 }
 
-void hs_clock_win32_gettime_processtime(long* t)
+void hs_clock_win32_gettime_processtime(long long* t)
 {
     FILETIME creation_time, exit_time, kernel_time, user_time;
     ULONGLONG time;
@@ -65,7 +65,7 @@ void hs_clock_win32_gettime_processtime(long* t)
     to_timespec_from_100ns(time, t);
 }
 
-void hs_clock_win32_gettime_threadtime(long* t)
+void hs_clock_win32_gettime_threadtime(long long* t)
 {
     FILETIME creation_time, exit_time, kernel_time, user_time;
     ULONGLONG time;
@@ -77,7 +77,7 @@ void hs_clock_win32_gettime_threadtime(long* t)
     to_timespec_from_100ns(time, t);
 }
 
-void hs_clock_win32_getres_monotonic(long* t)
+void hs_clock_win32_getres_monotonic(long long* t)
 {
     LARGE_INTEGER frequency;
     QueryPerformanceFrequency(&frequency);
@@ -87,19 +87,19 @@ void hs_clock_win32_getres_monotonic(long* t)
     t[1] = resolution % U64(1000000000);
 }
 
-void hs_clock_win32_getres_realtime(long* t)
+void hs_clock_win32_getres_realtime(long long* t)
 {
     t[0] = 0;
     t[1] = 100;
 }
 
-void hs_clock_win32_getres_processtime(long* t)
+void hs_clock_win32_getres_processtime(long long* t)
 {
     t[0] = 0;
     t[1] = 100;
 }
 
-void hs_clock_win32_getres_threadtime(long* t)
+void hs_clock_win32_getres_threadtime(long long* t)
 {
     t[0] = 0;
     t[1] = 100;
