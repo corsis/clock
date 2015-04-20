@@ -1,5 +1,5 @@
 name:          clock
-version:       0.4.1.3
+version:       0.4.2.0
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -17,12 +17,14 @@ description:   A package for convenient access to high-resolution clock and
                .
                Corrected dependency listing for @GHC < 7.6@ was contributed by Brian McKenna on 2014-09-30.
                .
+               Windows code corrected by Dimitri Sabadie on 2015-02-09.
+               .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014
+copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014, Dimitri Sabadie 2015
 license:       BSD3
 license-file:  LICENSE
 author:        Cetin Sert <cetin@corsis.eu>, Corsis Research
@@ -46,7 +48,7 @@ flag llvm
 
 library
     if impl (ghc < 7.6)
-      build-depends:       base >= 2 && <= 5, ghc-prim
+      build-depends:       base >= 4.4 && <= 5, ghc-prim
     build-depends:       base >= 2 && <= 5
     exposed-modules:     System.Clock
     extensions:          DeriveGeneric
