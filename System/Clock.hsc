@@ -11,9 +11,10 @@ module System.Clock
   , getTime
   , getRes
   , diffTimeSpec
+  , timeSpecAsNanoSecs
   ) where
 
-import Control.Applicative
+import Control.Applicative ((<$>), (<*>))
 import Data.Int
 import Data.Typeable (Typeable)
 import Foreign.Ptr
@@ -198,3 +199,7 @@ instance Ord TimeSpec where
 -- | Compute the absolute difference.
 diffTimeSpec :: TimeSpec -> TimeSpec -> TimeSpec
 diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
+
+-- | TimeSpec as nano seconds.
+timeSpecAsNanoSecs :: TimeSpec -> Integer
+timeSpecAsNanoSecs t = toInteger (sec t) * 1000000000 + toInteger (nsec t)

@@ -1,5 +1,5 @@
 name:          clock
-version:       0.4.2.0
+version:       0.4.5.0
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -19,18 +19,22 @@ description:   A package for convenient access to high-resolution clock and
                .
                Windows code corrected by Dimitri Sabadie on 2015-02-09.
                .
+               Added @timeSpecAsNanoSecs@ as observed widely-used by Chris Done on 2015-01-06, exported correctly on 2015-04-20.
+               .
+               Imported Control.Applicative operators correctly for Haskell Platform on Windows on 2015-04-21.
+               .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014, Dimitri Sabadie 2015
+copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014, Chris Done 2015, Dimitri Sabadie 2015
 license:       BSD3
 license-file:  LICENSE
 author:        Cetin Sert <cetin@corsis.eu>, Corsis Research
 maintainer:    Cetin Sert <cetin@corsis.eu>, Corsis Research
-homepage:      http://corsis.github.com/clock/
-bug-reports:   http://corsis.github.com/clock/issues
+homepage:      https://github.com/corsis/clock
+bug-reports:   https://github.com/corsis/clock/issues
 category:      System
 build-type:    Simple
 cabal-version: >= 1.6
