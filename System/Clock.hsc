@@ -24,7 +24,7 @@ import GHC.Generics (Generic)
 
 #if defined(_WIN32)
 #  include "hs_clock_win32.c"
-#elif defined(__MACH__)
+#elif defined(__MACH__) && defined(__APPLE__)
 #  include "hs_clock_darwin.c"
 #else
 #  include <time.h>
@@ -76,7 +76,7 @@ foreign import ccall hs_clock_win32_getres_monotonic :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_win32_getres_realtime :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_win32_getres_processtime :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
-#elif defined(__MACH__)
+#elif defined(__MACH__) && defined(__APPLE__)
 foreign import ccall hs_clock_darwin_gettime :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_darwin_getres  :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
 #else
@@ -85,7 +85,7 @@ foreign import ccall clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 #endif
 
 #if defined(_WIN32)
-#elif defined(__MACH__)
+#elif defined(__MACH__) && defined(__APPLE__)
 clockToConst :: Clock -> #{type clock_id_t}
 clockToConst Monotonic = #const SYSTEM_CLOCK
 clockToConst Realtime = #const CALENDAR_CLOCK
@@ -116,7 +116,7 @@ getTime Monotonic = allocaAndPeek hs_clock_win32_gettime_monotonic
 getTime Realtime = allocaAndPeek hs_clock_win32_gettime_realtime
 getTime ProcessCPUTime = allocaAndPeek hs_clock_win32_gettime_processtime
 getTime ThreadCPUTime = allocaAndPeek hs_clock_win32_gettime_threadtime
-#elif defined(__MACH__)
+#elif defined(__MACH__) && defined(__APPLE__)
 getTime clk = allocaAndPeek $ hs_clock_darwin_gettime $ clockToConst clk
 #else
 getTime clk = allocaAndPeek $ clock_gettime $ clockToConst clk
@@ -127,7 +127,7 @@ getRes Monotonic = allocaAndPeek hs_clock_win32_getres_monotonic
 getRes Realtime = allocaAndPeek hs_clock_win32_getres_realtime
 getRes ProcessCPUTime = allocaAndPeek hs_clock_win32_getres_processtime
 getRes ThreadCPUTime = allocaAndPeek hs_clock_win32_getres_threadtime
-#elif defined(__MACH__)
+#elif defined(__MACH__) && defined(__APPLE__)
 getRes clk = allocaAndPeek $ hs_clock_darwin_getres $ clockToConst clk
 #else
 getRes clk = allocaAndPeek $ clock_getres $ clockToConst clk
