@@ -179,8 +179,9 @@ instance Num TimeSpec where
       normalize $ TimeSpec (xs * ys) (xn * yn)
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
-  abs (TimeSpec xs xn) =
-      normalize $ TimeSpec (abs xs) (signum xs * xn)
+  abs (TimeSpec xs xn)
+	| xs == 0   = normalize $ TimeSpec 0 xn
+	| otherwise = normalize $ TimeSpec (abs xs) (signum xs * xn)
   signum (normalize -> TimeSpec xs yn)
     | signum xs == 0 = TimeSpec 0 (signum yn)
     | otherwise = TimeSpec 0 (signum xs)
