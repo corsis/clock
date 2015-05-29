@@ -183,7 +183,7 @@ instance Num TimeSpec where
     | xs == 0   = normalize $ TimeSpec 0 xn
     | otherwise = normalize $ TimeSpec (abs xs) (signum xs * xn)
   signum (normalize -> TimeSpec xs yn)
-    | signum xs == 0 = TimeSpec 0 (signum yn)
+    | xs == 0   = TimeSpec 0 (signum yn)
     | otherwise = TimeSpec 0 (signum xs)
   fromInteger x =
       -- For range, compute div, mod over integers, not any bounded type.
