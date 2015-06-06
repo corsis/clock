@@ -137,7 +137,7 @@ getRes clk = allocaAndPeek $ clock_getres $ clockToConst clk
 data TimeSpec = TimeSpec
   { sec  :: {-# UNPACK #-} !Int64 -- ^ seconds
   , nsec :: {-# UNPACK #-} !Int64 -- ^ nanoseconds
-  } deriving (Eq, Generic, Read, Show, Typeable)
+  } deriving (Generic, Read, Show, Typeable)
 
 #if defined(_WIN32)
 instance Storable TimeSpec where
@@ -188,6 +188,13 @@ instance Num TimeSpec where
       -- For range, compute div, mod over integers, not any bounded type.
       let (q, r) = x `divMod` (10^9)
       in TimeSpec (fromInteger q) (fromInteger r)
+
+instance Eq TimeSpec where
+  (normalize -> TimeSpec xs xn) == (normalize -> TimeSpec ys yn)
+    | True == equality = xn == yn
+    | otherwise = equality
+    where
+      equality = xs == ys
 
 instance Ord TimeSpec where
   compare (normalize -> TimeSpec xs xn) (normalize -> TimeSpec ys yn)
