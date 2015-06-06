@@ -190,7 +190,7 @@ instance Num TimeSpec where
       in TimeSpec (fromInteger q) (fromInteger r)
 
 instance Ord TimeSpec where
-  compare (TimeSpec xs xn) (TimeSpec ys yn)
+  compare (normalize -> TimeSpec xs xn) (normalize -> TimeSpec ys yn)
     | EQ == ordering = compare xn yn
     | otherwise = ordering
     where
