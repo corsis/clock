@@ -1,3 +1,4 @@
+
 -- | High-resolution, realtime clock and timer functions for Posix
 --   systems. This module is being developed according to IEEE Std
 --   1003.1-2008: <http://www.opengroup.org/onlinepubs/9699919799/>,
@@ -175,8 +176,8 @@ instance Num TimeSpec where
       normalize $ TimeSpec (xs + ys) (xn + yn)
   (TimeSpec xs xn) - (TimeSpec ys yn) =
       normalize $ TimeSpec (xs - ys) (xn - yn)
-  (TimeSpec xs xn) * (TimeSpec ys yn) =
-      normalize $ TimeSpec (xs * ys) (xn * yn)
+  (normalize -> TimeSpec xs xn) * (normalize -> TimeSpec ys yn) =
+      normalize $ TimeSpec (xs * ys + xs * yn `div` 10^9) ((xn * yn + xn * ys * 10^9) `div` 10^9)
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
   abs (TimeSpec xs xn)
