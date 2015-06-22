@@ -183,8 +183,9 @@ instance Num TimeSpec where
   abs (TimeSpec xs xn)
     | xs == 0   = normalize $ TimeSpec 0 xn
     | otherwise = normalize $ TimeSpec (abs xs) (signum xs * xn)
-  signum (normalize -> TimeSpec xs xn) =
-      TimeSpec (signum xs) (signum xn)
+  signum (normalize -> TimeSpec xs xn)
+      | xs == 0   = TimeSpec (signum xn) 0
+      | otherwise = TimeSpec (signum xs) 0
   fromInteger x =
       -- For range, compute div, mod over integers, not any bounded type.
       let (q, r) = x `divMod` (10^9)
