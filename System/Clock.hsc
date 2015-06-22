@@ -180,7 +180,7 @@ instance Num TimeSpec where
       normalize $ TimeSpec (xs * ys + xs * yn `div` 10^9) ((xn * yn + xn * ys * 10^9) `div` 10^9)
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
-  abs (TimeSpec xs xn)
+  abs (normalize -> TimeSpec xs xn)
     | xs == 0   = normalize $ TimeSpec 0 xn
     | otherwise = normalize $ TimeSpec (abs xs) (signum xs * xn)
   signum (normalize -> TimeSpec xs xn)
