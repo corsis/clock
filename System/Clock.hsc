@@ -177,7 +177,13 @@ instance Num TimeSpec where
   (TimeSpec xs xn) - (TimeSpec ys yn) =
       normalize $ TimeSpec (xs - ys) (xn - yn)
   (normalize -> TimeSpec xs xn) * (normalize -> TimeSpec ys yn) =
-      normalize $ TimeSpec (xs * ys) ((xn * yn + (xn * ys + xs * yn) * (10^9)) `div` (10^9))
+      let
+        xsi = toInteger xs
+        xni = toInteger xn
+        ysi = toInteger ys
+        yni = toInteger yn
+      in
+        normalize $ TimeSpec (fromInteger $ xsi * ysi) (fromInteger $ (xni * yni + (xni * ysi + xsi * yni) * (10^9)) `div` (10^9))
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
   abs (normalize -> TimeSpec xs xn)
