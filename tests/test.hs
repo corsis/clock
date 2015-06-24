@@ -1,5 +1,6 @@
 import Test.Tasty
 import Test.Tasty.QuickCheck as QuickCheck
+import Data.Fixed
 -- import Test.Tasty.HUnit as HUnit
 import System.Clock
 
@@ -25,11 +26,10 @@ qcNumClass = testGroup "quick checking"
   , QuickCheck.testProperty "rational multiplication equals TimeSpec multiplication" $
       \ x y ->
         let
-          rationalMul = truncate ((x :: Rational) * (y :: Rational) * (10^9))
+          rationalMul = truncate ((x :: Nano) * (y :: Nano) * (10^9))
 	  timespecMul = timeSpecAsNanoSecs (
               fromInteger (truncate (x * 10^9))
             * fromInteger (truncate (y * 10^9)))
 	in
-          -- there is some rounding error, we cannot compare directly with ==
-	  abs (rationalMul - timespecMul) <= 10
+	  rationalMul == timespecMul
   ]
