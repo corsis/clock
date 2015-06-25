@@ -1,5 +1,5 @@
 name:          clock
-version:       0.5.0.0
+version:       0.5.0.1
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -30,7 +30,7 @@ description:   A package for convenient access to high-resolution clock and
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014, Chris Done 2015, Dimitri Sabadie 2015
+copyright:     Copyright © Cetin Sert 2009-2013, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014, Chris Done 2015, Dimitri Sabadie 2015, Christian Burger 2015
 license:       BSD3
 license-file:  LICENSE
 author:        Cetin Sert <cetin@corsis.eu>, Corsis Research
