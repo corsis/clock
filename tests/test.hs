@@ -11,7 +11,7 @@ instance Arbitrary TimeSpec where
     nan <- arbitrarySizedIntegral
     return $ TimeSpec sec nan
 
-main = defaultMain adjustOption (QuickCheckTests 100000 +) $ tests
+main = defaultMain (adjustOption (QuickCheckTests 100000 +) $ tests)
 
 tests :: TestTree
 tests = testGroup "All tests" [numInstanceTests, eqOrdInstancesTests]

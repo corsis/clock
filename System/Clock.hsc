@@ -166,9 +166,11 @@ instance Storable TimeSpec where
 #endif
 
 normalize :: TimeSpec -> TimeSpec
-normalize (TimeSpec xs xn) =
+normalize (TimeSpec xs xn)
+  | xn < 0 || xn >= 10^9 =
     let (q, r) = xn `divMod` (10^9)
     in TimeSpec (xs + q) r
+  | otherwise            = TimeSpec xs xn
 
 instance Num TimeSpec where
   (TimeSpec xs xn) + (TimeSpec ys yn) =
