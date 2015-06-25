@@ -14,19 +14,19 @@ instance Arbitrary TimeSpec where
 main = defaultMain adjustOption (QuickCheckTests 100000 +) $ tests
 
 tests :: TestTree
-tests = testGroup "All tests" [numClassTests, eqOrdClassesTests]
+tests = testGroup "All tests" [numInstanceTests, eqOrdInstancesTests]
 
-numClassTests = testGroup "Num class tests" [
+numInstanceTests = testGroup "Num class tests" [
   -- let's make at least 100,000 tests
-  qcNumClass
+  qcNumInstance
   ]
 
-eqOrdClassesTests = testGroup "Eq and Ord instance tests" [
+eqOrdInstancesTests = testGroup "Eq and Ord instance tests" [
   -- let's make at least 100,000 tests
-  qcEqOrdClass
+  qcEqOrdInstance
   ]
 
-qcNumClass = testGroup "QuickCheck"
+qcNumInstance = testGroup "QuickCheck"
   [ 
     QuickCheck.testProperty "x = abs(x) * signum(x)" $
       \ x -> (x :: TimeSpec) == (abs x) * (signum x)
@@ -48,9 +48,12 @@ qcNumClass = testGroup "QuickCheck"
       \ x -> negate (negate x :: TimeSpec) == x
   ]
 
-qcEqOrdClass = testGroup "QuickCheck"
+qcEqOrdInstance = testGroup "QuickCheck"
   [
     QuickCheck.testProperty
       "random list of TimeSpecs is sorted like equivalent list of integers" $
-      \ x -> sort (x :: [TimeSpec]) == map (fromInteger) (sort (map timeSpecAsNanoSecs x))
+      \ x ->
+        sort (x :: [TimeSpec])
+        ==
+        map (fromInteger) (sort (map timeSpecAsNanoSecs x))
   ]
