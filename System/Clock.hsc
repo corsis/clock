@@ -178,12 +178,18 @@ instance Num TimeSpec where
       normalize $ TimeSpec (xs - ys) (xn - yn)
   (normalize -> TimeSpec xs xn) * (normalize -> TimeSpec ys yn) =
       let
+        -- convert to arbitraty Integer type to avoid int overflow
         xsi = toInteger xs
         xni = toInteger xn
         ysi = toInteger ys
         yni = toInteger yn
       in
-        normalize $ TimeSpec (fromInteger $ xsi * ysi) (fromInteger $ (xni * yni + (xni * ysi + xsi * yni) * (10^9)) `div` (10^9))
+        normalize $ TimeSpec
+          -- seconds
+          (fromInteger $ xsi * ysi)
+          -- nanoseconds
+          (fromInteger $ (xni * yni + (xni * ysi + xsi * yni) * (10^9)) 
+            `div` (10^9))
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
   abs (normalize -> TimeSpec xs xn)
@@ -217,4 +223,4 @@ diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
 
 -- | TimeSpec as nano seconds.
 timeSpecAsNanoSecs :: TimeSpec -> Integer
-timeSpecAsNanoSecs t = toInteger (sec t) * 1000000000 + toInteger (nsec t)
+timeSpecAsNanoSecs t = toInteger (sec t) * (10^9) + toInteger (nsec t)
