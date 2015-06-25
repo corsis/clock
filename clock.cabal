@@ -1,5 +1,5 @@
 name:          clock
-version:       0.4.5.0
+version:       0.5.0.0
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -22,6 +22,8 @@ description:   A package for convenient access to high-resolution clock and
                Added @timeSpecAsNanoSecs@ as observed widely-used by Chris Done on 2015-01-06, exported correctly on 2015-04-20.
                .
                Imported Control.Applicative operators correctly for Haskell Platform on Windows on 2015-04-21.
+               .
+               Unit tests and instance fixes by Christian Burger on 2015-06-25.
                .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
