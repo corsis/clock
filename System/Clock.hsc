@@ -4,6 +4,9 @@
 --   <http://www.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html#>
 
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
+-- To allow importing Data.Int and Data.Word indiscriminately on all platforms,
+-- since we can't systematically predict what typedef's expand to.
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
 
 module System.Clock
   ( Clock(..)
@@ -16,6 +19,7 @@ module System.Clock
 
 import Control.Applicative ((<$>), (<*>))
 import Data.Int
+import Data.Word
 import Data.Typeable (Typeable)
 import Foreign.Ptr
 import Foreign.Storable
@@ -189,7 +193,7 @@ instance Num TimeSpec where
           -- seconds
           (fromInteger $ xsi * ysi)
           -- nanoseconds
-          (fromInteger $ (xni * yni + (xni * ysi + xsi * yni) * (10^9)) 
+          (fromInteger $ (xni * yni + (xni * ysi + xsi * yni) * (10^9))
             `div` (10^9))
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
