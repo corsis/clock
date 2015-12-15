@@ -84,7 +84,7 @@ data Clock
     --   adjtime(3).
   | MonotonicRaw
 
-    -- | since Linux 2.6.39; Linux-specific)
+    -- | (since Linux 2.6.39; Linux-specific)
     --   Identical to CLOCK_MONOTONIC, except it also includes
     --   any time that the system is suspended.  This allows
     --   applications to get a suspend-aware monotonic clock
