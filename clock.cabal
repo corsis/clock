@@ -1,5 +1,5 @@
 name:          clock
-version:       0.5.2
+version:       0.6.0
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -25,7 +25,9 @@ description:   A package for convenient access to high-resolution clock and
                .
                Unit tests and instance fixes by Christian Burger on 2015-06-25.
                .
-               Removed fromInteger definition for TimeSpec, Cetin Sert on 2015-12-15.
+               Removal of fromInteger : Integer -> TimeSpec by Cetin Sert on 2015-12-15.
+               .
+               New Linux-specific Clocks: MonotonicRaw, Boottime, MonotonicCoarse, RealtimeCoarse by Cetin Sert on 2015-12-15.
                .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly

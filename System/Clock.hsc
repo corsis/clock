@@ -43,8 +43,10 @@ import GHC.Generics (Generic)
 
 -- | Clock types. A clock may be system-wide (that is, visible to all processes)
 --   or per-process (measuring time that is meaningful only within a process).
---   All implementations shall support CLOCK_REALTIME.
+--   All implementations shall support CLOCK_REALTIME. (The only suspend-aware
+--   monotonic is CLOCK_BOOTTIME on Linux.)
 data Clock
+
     -- | The identifier for the system-wide monotonic clock, which is defined as
     --   a clock measuring real time, whose value cannot be set via
     --   @clock_settime@ and which cannot have negative clock jumps. The maximum
@@ -57,18 +59,52 @@ data Clock
     --   thus there is no need to set it. Furthermore, realtime applications can
     --   rely on the fact that the value of this clock is never set.
   = Monotonic
+
     -- | The identifier of the system-wide clock measuring real time. For this
     --   clock, the value returned by getTime represents the amount of time (in
     --   seconds and nanoseconds) since the Epoch.
   | Realtime
+
     -- | The identifier of the CPU-time clock associated with the calling
     --   process. For this clock, the value returned by getTime represents the
     --   amount of execution time of the current process.
   | ProcessCPUTime
-  -- | The identifier of the CPU-time clock associated with the calling OS
-  --   thread. For this clock, the value returned by getTime represents the
-  --   amount of execution time of the current OS thread.
+
+    -- | The identifier of the CPU-time clock associated with the calling OS
+    --   thread. For this clock, the value returned by getTime represents the
+    --   amount of execution time of the current OS thread.
   | ThreadCPUTime
+
+#if defined (linux_HOST_OS)
+
+    -- | (since Linux 2.6.28; Linux-specific)
+    --   Similar to CLOCK_MONOTONIC, but provides access to a
+    --   raw hardware-based time that is not subject to NTP
+    --   adjustments or the incremental adjustments performed by
+    --   adjtime(3).
+  | MonotonicRaw
+
+    -- | since Linux 2.6.39; Linux-specific)
+    --   Identical to CLOCK_MONOTONIC, except it also includes
+    --   any time that the system is suspended.  This allows
+    --   applications to get a suspend-aware monotonic clock
+    --   without having to deal with the complications of
+    --   CLOCK_REALTIME, which may have discontinuities if the
+    --   time is changed using settimeofday(2).
+  | Boottime
+
+    -- | (since Linux 2.6.32; Linux-specific)
+    --   A faster but less precise version of CLOCK_MONOTONIC.
+    --   Use when you need very fast, but not fine-grained timestamps.
+  | MonotonicCoarse
+
+    -- | (since Linux 2.6.32; Linux-specific)
+    --   A faster but less precise version of CLOCK_REALTIME.
+    --   Use when you need very fast, but not fine-grained timestamps.
+  | RealtimeCoarse
+
+#endif
+
   deriving (Eq, Enum, Generic, Read, Show, Typeable)
 
 #if defined(_WIN32)
@@ -92,15 +128,21 @@ foreign import ccall clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 #elif defined(__MACH__) && defined(__APPLE__)
 clockToConst :: Clock -> #{type clock_id_t}
 clockToConst Monotonic = #const SYSTEM_CLOCK
-clockToConst Realtime = #const CALENDAR_CLOCK
+clockToConst  Realtime = #const CALENDAR_CLOCK
 clockToConst ProcessCPUTime = #const SYSTEM_CLOCK
-clockToConst ThreadCPUTime = #const SYSTEM_CLOCK
+clockToConst  ThreadCPUTime = #const SYSTEM_CLOCK
 #else
 clockToConst :: Clock -> #{type clockid_t}
 clockToConst Monotonic = #const CLOCK_MONOTONIC
-clockToConst Realtime = #const CLOCK_REALTIME
+clockToConst  Realtime = #const CLOCK_REALTIME
 clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
-clockToConst ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
+clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
+#if defined (linux_HOST_OS)
+clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
+clockToConst        Boottime = #const CLOCK_BOOTTIME
+clockToConst MonotonicCoarse = #const CLOCK_MONOTONIC_COARSE
+clockToConst  RealtimeCoarse = #const CLOCK_REALTIME_COARSE
+#endif
 #endif
 
 allocaAndPeek :: Storable a => (Ptr a -> IO ()) -> IO a
@@ -175,8 +217,8 @@ normalize (TimeSpec xs xn) | xn < 0 || xn >= 10^9 = TimeSpec (xs + q)  r
                              where (q, r) = xn `divMod` (10^9)
 
 instance Num TimeSpec where
-  (TimeSpec xs xn) + (TimeSpec ys yn) = normalize $ TimeSpec (xs + ys) (xn + yn)
-  (TimeSpec xs xn) - (TimeSpec ys yn) = normalize $ TimeSpec (xs - ys) (xn - yn)
+  (TimeSpec xs xn) + (TimeSpec ys yn) = normalize $! TimeSpec (xs + ys) (xn + yn)
+  (TimeSpec xs xn) - (TimeSpec ys yn) = normalize $! TimeSpec (xs - ys) (xn - yn)
   (TimeSpec xs xn) * (TimeSpec ys yn) =
       let xsi = toInteger xs -- convert to arbitraty Integer type to avoid int overflow
           xni = toInteger xn
@@ -192,18 +234,14 @@ instance Num TimeSpec where
 --fromInteger x = TimeSpec (fromInteger q) (fromInteger r) where (q, r) = x `divMod` (10^9)
 
 instance Eq TimeSpec where
-  (normalize -> TimeSpec xs xn) == (normalize -> TimeSpec ys yn)
-    | True == equality = xn == yn
-    | otherwise = equality
-    where
-      equality = xs == ys
+  (normalize -> TimeSpec xs xn) == (normalize -> TimeSpec ys yn) | True == es = xn == yn
+                                                                 | otherwise  = es
+                                                                   where   es = xs == ys
 
 instance Ord TimeSpec where
-  compare (normalize -> TimeSpec xs xn) (normalize -> TimeSpec ys yn)
-    | EQ == ordering = compare xn yn
-    | otherwise = ordering
-    where
-      ordering = compare xs ys
+  compare (normalize -> TimeSpec xs xn) (normalize -> TimeSpec ys yn) | EQ ==  os = compare xn yn
+                                                                      | otherwise = os
+                                                                        where  os = compare xs ys
 
 -- | Compute the absolute difference.
 diffTimeSpec :: TimeSpec -> TimeSpec -> TimeSpec
