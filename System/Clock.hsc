@@ -170,43 +170,26 @@ instance Storable TimeSpec where
 #endif
 
 normalize :: TimeSpec -> TimeSpec
-normalize (TimeSpec xs xn)
-  | xn < 0 || xn >= 10^9 =
-    let (q, r) = xn `divMod` (10^9)
-    in TimeSpec (xs + q) r
-  | otherwise            = TimeSpec xs xn
+normalize (TimeSpec xs xn) | xn < 0 || xn >= 10^9 = TimeSpec (xs + q)  r
+                           | otherwise            = TimeSpec  xs      xn
+                             where (q, r) = xn `divMod` (10^9)
 
 instance Num TimeSpec where
-  (TimeSpec xs xn) + (TimeSpec ys yn) =
-      normalize $ TimeSpec (xs + ys) (xn + yn)
-  (TimeSpec xs xn) - (TimeSpec ys yn) =
-      normalize $ TimeSpec (xs - ys) (xn - yn)
-  (normalize -> TimeSpec xs xn) * (normalize -> TimeSpec ys yn) =
-      let
-        -- convert to arbitraty Integer type to avoid int overflow
-        xsi = toInteger xs
-        xni = toInteger xn
-        ysi = toInteger ys
-        yni = toInteger yn
-      in
-        normalize $ TimeSpec
-          -- seconds
-          (fromInteger $ xsi * ysi)
-          -- nanoseconds
-          (fromInteger $ (xni * yni + (xni * ysi + xsi * yni) * (10^9))
-            `div` (10^9))
+  (TimeSpec xs xn) + (TimeSpec ys yn) = normalize $ TimeSpec (xs + ys) (xn + yn)
+  (TimeSpec xs xn) - (TimeSpec ys yn) = normalize $ TimeSpec (xs - ys) (xn - yn)
+  (TimeSpec xs xn) * (TimeSpec ys yn) =
+      let xsi = toInteger xs -- convert to arbitraty Integer type to avoid int overflow
+          xni = toInteger xn
+          ysi = toInteger ys
+          yni = toInteger yn   -- seconds                -- nanoseconds
+      in normalize $! TimeSpec (fromInteger $! xsi * ysi) (fromInteger $! (xni * yni + (xni * ysi + xsi * yni) * (10^9)) `div` (10^9))
   negate (TimeSpec xs xn) =
       normalize $ TimeSpec (negate xs) (negate xn)
-  abs (normalize -> TimeSpec xs xn)
-    | xs == 0   = normalize $ TimeSpec 0 xn
-    | otherwise = normalize $ TimeSpec (abs xs) (signum xs * xn)
-  signum (normalize -> TimeSpec xs xn)
-      | xs == 0   = TimeSpec (signum xn) 0
-      | otherwise = TimeSpec (signum xs) 0
-  fromInteger x =
-      -- For range, compute div, mod over integers, not any bounded type.
-      let (q, r) = x `divMod` (10^9)
-      in TimeSpec (fromInteger q) (fromInteger r)
+  abs    (normalize -> TimeSpec xs xn) | xs == 0   = normalize $! TimeSpec 0 xn
+                                       | otherwise = normalize $! TimeSpec (abs xs) (signum xs * xn)
+  signum (normalize -> TimeSpec xs xn) | xs == 0   = TimeSpec (signum xn) 0
+                                       | otherwise = TimeSpec (signum xs) 0
+--fromInteger x = TimeSpec (fromInteger q) (fromInteger r) where (q, r) = x `divMod` (10^9)
 
 instance Eq TimeSpec where
   (normalize -> TimeSpec xs xn) == (normalize -> TimeSpec ys yn)
