@@ -63,17 +63,17 @@ data Clock
   = Monotonic
 
     -- | The identifier of the system-wide clock measuring real time. For this
-    --   clock, the value returned by getTime represents the amount of time (in
+    --   clock, the value returned by 'getTime' represents the amount of time (in
     --   seconds and nanoseconds) since the Epoch.
   | Realtime
 
     -- | The identifier of the CPU-time clock associated with the calling
-    --   process. For this clock, the value returned by getTime represents the
+    --   process. For this clock, the value returned by 'getTime' represents the
     --   amount of execution time of the current process.
   | ProcessCPUTime
 
     -- | The identifier of the CPU-time clock associated with the calling OS
-    --   thread. For this clock, the value returned by getTime represents the
+    --   thread. For this clock, the value returned by 'getTime' represents the
     --   amount of execution time of the current OS thread.
   | ThreadCPUTime
 
