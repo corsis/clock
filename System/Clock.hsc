@@ -13,6 +13,8 @@ module System.Clock
   , TimeSpec(..)
   , getTime
   , getRes
+  , fromNanoSecs
+  , toNanoSecs
   , diffTimeSpec
   , timeSpecAsNanoSecs
   ) where
@@ -163,9 +165,9 @@ getTime Realtime = allocaAndPeek hs_clock_win32_gettime_realtime
 getTime ProcessCPUTime = allocaAndPeek hs_clock_win32_gettime_processtime
 getTime ThreadCPUTime = allocaAndPeek hs_clock_win32_gettime_threadtime
 #elif defined(__MACH__) && defined(__APPLE__)
-getTime clk = allocaAndPeek $ hs_clock_darwin_gettime $ clockToConst clk
+getTime clk = allocaAndPeek $! hs_clock_darwin_gettime $! clockToConst clk
 #else
-getTime clk = allocaAndPeek $ clock_gettime $ clockToConst clk
+getTime clk = allocaAndPeek $! clock_gettime $! clockToConst clk
 #endif
 
 #if defined(_WIN32)
@@ -174,9 +176,9 @@ getRes Realtime = allocaAndPeek hs_clock_win32_getres_realtime
 getRes ProcessCPUTime = allocaAndPeek hs_clock_win32_getres_processtime
 getRes ThreadCPUTime = allocaAndPeek hs_clock_win32_getres_threadtime
 #elif defined(__MACH__) && defined(__APPLE__)
-getRes clk = allocaAndPeek $ hs_clock_darwin_getres $ clockToConst clk
+getRes clk = allocaAndPeek $! hs_clock_darwin_getres $! clockToConst clk
 #else
-getRes clk = allocaAndPeek $ clock_getres $ clockToConst clk
+getRes clk = allocaAndPeek $! clock_getres $! clockToConst clk
 #endif
 
 -- | TimeSpec structure
@@ -211,27 +213,36 @@ instance Storable TimeSpec where
       return $ TimeSpec (fromIntegral xs) (fromIntegral xn)
 #endif
 
+s2ns :: Num a => a
+s2ns = 10^9
+
 normalize :: TimeSpec -> TimeSpec
-normalize (TimeSpec xs xn) | xn < 0 || xn >= 10^9 = TimeSpec (xs + q)  r
+normalize (TimeSpec xs xn) | xn < 0 || xn >= s2ns = TimeSpec (xs + q)  r
                            | otherwise            = TimeSpec  xs      xn
-                             where (q, r) = xn `divMod` (10^9)
+                             where (q, r) = xn `divMod` s2ns
 
 instance Num TimeSpec where
   (TimeSpec xs xn) + (TimeSpec ys yn) = normalize $! TimeSpec (xs + ys) (xn + yn)
   (TimeSpec xs xn) - (TimeSpec ys yn) = normalize $! TimeSpec (xs - ys) (xn - yn)
-  (TimeSpec xs xn) * (TimeSpec ys yn) =
-      let xsi = toInteger xs -- convert to arbitraty Integer type to avoid int overflow
-          xni = toInteger xn
-          ysi = toInteger ys
-          yni = toInteger yn   -- seconds                -- nanoseconds
-      in normalize $! TimeSpec (fromInteger $! xsi * ysi) (fromInteger $! (xni * yni + (xni * ysi + xsi * yni) * (10^9)) `div` (10^9))
-  negate (TimeSpec xs xn) =
-      normalize $ TimeSpec (negate xs) (negate xn)
+  (TimeSpec xs xn) * (TimeSpec ys yn) = normalize $! TimeSpec (xsi_ysi) (xni_yni)
+                                         where xsi_ysi = fromInteger $!  xsi*ysi 
+                                               xni_yni = fromInteger $! (xni*yni + (xni*ysi + xsi*yni) * s2ns) `div` s2ns
+                                               xsi     =   toInteger  xs
+                                               ysi     =   toInteger  ys
+                                               xni     =   toInteger  xn
+                                               yni     =   toInteger  yn
+--     let xsi = toInteger xs    -- convert to arbitraty Integer type to avoid int overflow
+--         xni = toInteger xn
+--         ysi = toInteger ys
+--           yni = toInteger yn    -- seconds                 -- nanoseconds
+--       in normalize $! TimeSpec (fromInteger $! xsi * ysi) (fromInteger $! (xni * yni + (xni * ysi + xsi * yni) * s2ns) `div` s2ns)
+
+  negate (TimeSpec xs xn) = normalize $! TimeSpec (negate xs) (negate xn)
   abs    (normalize -> TimeSpec xs xn) | xs == 0   = normalize $! TimeSpec 0 xn
                                        | otherwise = normalize $! TimeSpec (abs xs) (signum xs * xn)
   signum (normalize -> TimeSpec xs xn) | xs == 0   = TimeSpec (signum xn) 0
                                        | otherwise = TimeSpec (signum xs) 0
---fromInteger x = TimeSpec (fromInteger q) (fromInteger r) where (q, r) = x `divMod` (10^9)
+  fromInteger x = TimeSpec (fromInteger q) (fromInteger r) where (q, r) = x `divMod` s2ns
 
 instance Eq TimeSpec where
   (normalize -> TimeSpec xs xn) == (normalize -> TimeSpec ys yn) | True == es = xn == yn
@@ -243,10 +254,20 @@ instance Ord TimeSpec where
                                                                       | otherwise = os
                                                                         where  os = compare xs ys
 
+-- | TimeSpec from nano seconds.
+fromNanoSecs :: Integer -> TimeSpec
+fromNanoSecs x = TimeSpec (fromInteger  q) (fromInteger  r) where (q, r) = x `divMod` s2ns
+
+
+-- | TimeSpec to nano seconds.
+toNanoSecs :: TimeSpec -> Integer
+toNanoSecs   (TimeSpec  (toInteger -> s) (toInteger -> n)) = s * s2ns + n
+
 -- | Compute the absolute difference.
 diffTimeSpec :: TimeSpec -> TimeSpec -> TimeSpec
 diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
 
+{-# DEPRECATED timeSpecAsNanoSecs "Use toNanoSecs instead! Replaced timeSpecAsNanoSecs with the same signature TimeSpec -> Integer" #-}
 -- | TimeSpec as nano seconds.
 timeSpecAsNanoSecs :: TimeSpec -> Integer
-timeSpecAsNanoSecs t = toInteger (sec t) * (10^9) + toInteger (nsec t)
+timeSpecAsNanoSecs   (TimeSpec s n) = toInteger s * s2ns + toInteger n
