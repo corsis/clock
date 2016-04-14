@@ -1,5 +1,5 @@
 name:          clock
-version:       0.7.1.1
+version:       0.7.1.2
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
