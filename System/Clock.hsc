@@ -141,7 +141,11 @@ clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
 clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
 #if defined (linux_HOST_OS)
 clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
+#if defined(CLOCK_BOOTTIME)
 clockToConst        Boottime = #const CLOCK_BOOTTIME
+#else
+clockToConst        Boottime = 7
+#endif
 clockToConst MonotonicCoarse = #const CLOCK_MONOTONIC_COARSE
 clockToConst  RealtimeCoarse = #const CLOCK_REALTIME_COARSE
 #endif
