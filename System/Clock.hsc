@@ -77,15 +77,16 @@ data Clock
     --   amount of execution time of the current OS thread.
   | ThreadCPUTime
 
-#if defined (linux_HOST_OS)
-
+#if defined (CLOCK_MONOTONIC_RAW)
     -- | (since Linux 2.6.28; Linux-specific)
     --   Similar to CLOCK_MONOTONIC, but provides access to a
     --   raw hardware-based time that is not subject to NTP
     --   adjustments or the incremental adjustments performed by
     --   adjtime(3).
   | MonotonicRaw
+#endif
 
+#if defined (CLOCK_BOOTTIME)
     -- | (since Linux 2.6.39; Linux-specific)
     --   Identical to CLOCK_MONOTONIC, except it also includes
     --   any time that the system is suspended.  This allows
@@ -94,17 +95,20 @@ data Clock
     --   CLOCK_REALTIME, which may have discontinuities if the
     --   time is changed using settimeofday(2).
   | Boottime
+#endif
 
+#if defined (CLOCK_MONOTONIC_COARSE)
     -- | (since Linux 2.6.32; Linux-specific)
     --   A faster but less precise version of CLOCK_MONOTONIC.
     --   Use when you need very fast, but not fine-grained timestamps.
   | MonotonicCoarse
+#endif
 
+#if defined (CLOCK_REALTIME_COARSE)
     -- | (since Linux 2.6.32; Linux-specific)
     --   A faster but less precise version of CLOCK_REALTIME.
     --   Use when you need very fast, but not fine-grained timestamps.
   | RealtimeCoarse
-
 #endif
 
   deriving (Eq, Enum, Generic, Read, Show, Typeable)
@@ -139,12 +143,23 @@ clockToConst Monotonic = #const CLOCK_MONOTONIC
 clockToConst  Realtime = #const CLOCK_REALTIME
 clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
 clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
-#if defined (linux_HOST_OS)
+
+#if defined (CLOCK_MONOTONIC_RAW)
 clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
+#endif
+
+#if defined (CLOCK_BOOTTIME)
 clockToConst        Boottime = #const CLOCK_BOOTTIME
+#endif
+
+#if defined (CLOCK_MONOTONIC_COARSE)
 clockToConst MonotonicCoarse = #const CLOCK_MONOTONIC_COARSE
+#endif
+
+#if defined (CLOCK_REALTIME_COARSE)
 clockToConst  RealtimeCoarse = #const CLOCK_REALTIME_COARSE
 #endif
+
 #endif
 
 allocaAndPeek :: Storable a => (Ptr a -> IO ()) -> IO a
