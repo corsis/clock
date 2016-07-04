@@ -93,3 +93,15 @@ test-suite test
       , tasty >= 0.10
       , tasty-quickcheck
       , clock
+
+benchmark benchmarks
+    type:
+      exitcode-stdio-1.0
+    hs-source-dirs:
+      bench
+    main-is:
+      benchmarks.hs
+    build-depends:
+        base >= 4 && < 5
+      , criterion
+      , clock
