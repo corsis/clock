@@ -31,9 +31,15 @@ static void to_timespec_from_100ns(ULONGLONG t_100ns, long long *t)
 void hs_clock_win32_gettime_monotonic(long long* t)
 {
    LARGE_INTEGER time;
-   LARGE_INTEGER frequency;
+   static LARGE_INTEGER frequency;
+   static int hasFreq = 0;
+
    QueryPerformanceCounter(&time);
-   QueryPerformanceFrequency(&frequency);
+   if (!hasFreq)
+   {
+      hasFreq = 1;
+      QueryPerformanceFrequency(&frequency);
+   }
    // seconds
    t[0] = time.QuadPart / frequency.QuadPart;
    // nanos =
