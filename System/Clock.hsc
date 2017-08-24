@@ -41,7 +41,9 @@ import GHC.Generics (Generic)
 #  endif
 #endif
 
-#let alignment t = "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__)
+#if __GLASGOW_HASKELL__ < 800
+#  let alignment t = "%lu", (unsigned long)offsetof(struct {char x__; t (y__); }, y__)
+#endif
 
 -- | Clock types. A clock may be system-wide (that is, visible to all processes)
 --   or per-process (measuring time that is meaningful only within a process).
