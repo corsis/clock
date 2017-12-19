@@ -23,7 +23,7 @@ qcNumInstance = testGroup "QuickCheck"
   [ 
     QuickCheck.testProperty "x = abs(x) * signum(x)"                                 $ \ x   -> (x :: TimeSpec) == (abs x) * (signum x)
   , QuickCheck.testProperty "integer     addition equals TimeSpec     addition"      $ \ x y -> x + y == toNanoSecs (fromInteger x + fromInteger y)
-  , QuickCheck.testProperty "integer substraction equals TimeSpec subtracttion"      $ \ x y -> x - y == toNanoSecs (fromInteger x - fromInteger y)
+  , QuickCheck.testProperty "integer subtraction equals TimeSpec subtracttion"      $ \ x y -> x - y == toNanoSecs (fromInteger x - fromInteger y)
   , QuickCheck.testProperty "rational multiplication equals TimeSpec multiplication" $
       \ x y ->
         let rationalMul = truncate                         ((x :: Nano) *                       (y :: Nano) * (10^9))
