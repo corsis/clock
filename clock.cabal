@@ -74,6 +74,10 @@ library
       c-sources:         cbits/hs_clock_darwin.c
     if os(windows)
       c-sources:         cbits/hs_clock_win32.c
+
+      -- See https://ghc.haskell.org/trac/ghc/ticket/15094
+      if arch(i386)
+        extra-libraries: gcc_s_dw2-1
     include-dirs:        cbits
     ghc-options:         -O3 -Wall
 
