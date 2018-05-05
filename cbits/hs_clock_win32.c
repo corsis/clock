@@ -28,6 +28,10 @@ static void to_timespec_from_100ns(ULONGLONG t_100ns, long long *t)
     t[1] = 100*(long)(t_100ns % 10000000UL);
 }
 
+/* See https://ghc.haskell.org/trac/ghc/ticket/15094 */
+#if defined(_WIN32) && !defined(_WIN64)
+__attribute__((optimize("-fno-expensive-optimizations")))
+#endif
 void hs_clock_win32_gettime_monotonic(long long* t)
 {
    LARGE_INTEGER time;
