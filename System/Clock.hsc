@@ -128,8 +128,8 @@ foreign import ccall hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_darwin_gettime :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_darwin_getres  :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
 #else
-foreign import ccall clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
-foreign import ccall clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
+foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
+foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 #endif
 
 #if defined(_WIN32)
