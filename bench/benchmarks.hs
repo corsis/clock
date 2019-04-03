@@ -1,7 +1,12 @@
+{-# language CPP #-}
 module Main (main) where
 
 import Criterion.Main
 import System.Clock
+
+#if MIN_VERSION_base(4,11,0)
+import GHC.Clock
+#endif
 
 main :: IO ()
 main = defaultMain [
@@ -15,4 +20,7 @@ main = defaultMain [
       , bench "MonotonicCoarse" $ whnfIO (getTime MonotonicCoarse)
       , bench "RealtimeCoarse" $ whnfIO (getTime RealtimeCoarse)
       ]
+#if MIN_VERSION_base(4,11,0)
+  , bench "GHC.Clock.getMonotonicTimeNSec" $ whnfIO getMonotonicTimeNSec
+#endif
   ]
