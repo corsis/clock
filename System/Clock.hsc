@@ -132,8 +132,8 @@ foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -
 foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 #endif
 
-#if defined(_WIN32)
-#elif defined(__MACH__) && defined(__APPLE__)
+#if !defined(_WIN32)
+#if defined(__MACH__) && defined(__APPLE__)
 clockToConst :: Clock -> #{type clock_id_t}
 clockToConst Monotonic = #const SYSTEM_CLOCK
 clockToConst  Realtime = #const CALENDAR_CLOCK
@@ -145,23 +145,20 @@ clockToConst Monotonic = #const CLOCK_MONOTONIC
 clockToConst  Realtime = #const CLOCK_REALTIME
 clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
 clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
+#endif
 
 #if defined (CLOCK_MONOTONIC_RAW)
 clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
 #endif
-
 #if defined (CLOCK_BOOTTIME)
 clockToConst        Boottime = #const CLOCK_BOOTTIME
 #endif
-
 #if defined (CLOCK_MONOTONIC_COARSE)
 clockToConst MonotonicCoarse = #const CLOCK_MONOTONIC_COARSE
 #endif
-
 #if defined (CLOCK_REALTIME_COARSE)
 clockToConst  RealtimeCoarse = #const CLOCK_REALTIME_COARSE
 #endif
-
 #endif
 
 allocaAndPeek :: Storable a => (Ptr a -> IO ()) -> IO a
