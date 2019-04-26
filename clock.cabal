@@ -1,5 +1,5 @@
 name:          clock
-version:       0.7.2
+version:       0.8
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -32,6 +32,8 @@ description:   A package for convenient access to high-resolution clock and
                Reintroduction fromInteger : Integer -> TimeSpec by Cetin Sert on 2016-04-05.
                .
                Fixes for older Linux build failures introduced by new Linux-specific clocks by Mario Longobardi on 2016-04-18.
+               .
+               Refreshment release in 2019-04 after numerous contributions.
                .
                [Version Scheme]
                Major-@/R/@-ewrite . New-@/F/@-unctionality . @/I/@-mprovementAndBugFixes . @/P/@-ackagingOnly
