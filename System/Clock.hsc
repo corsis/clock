@@ -62,7 +62,7 @@ data Clock
     --   monotonic clock is meaningless (because its origin is arbitrary), and
     --   thus there is no need to set it. Furthermore, realtime applications can
     --   rely on the fact that the value of this clock is never set.
-    --   (same as Boottime since Linux 4.3, see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d6ed449afdb38f89a7b38ec50e367559e1b8f71f)
+    --   (same as 'Boottime' since Linux 4.17, see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d6ed449afdb38f89a7b38ec50e367559e1b8f71f)
   = Monotonic
 
     -- | The identifier of the system-wide clock measuring real time. For this
