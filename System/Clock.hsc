@@ -47,8 +47,7 @@ import GHC.Generics (Generic)
 
 -- | Clock types. A clock may be system-wide (that is, visible to all processes)
 --   or per-process (measuring time that is meaningful only within a process).
---   All implementations shall support CLOCK_REALTIME. (The only suspend-aware
---   monotonic is CLOCK_BOOTTIME on Linux.)
+--   All implementations shall support 'Realtime'. 
 data Clock
 
     -- | The identifier for the system-wide monotonic clock, which is defined as
@@ -62,12 +61,14 @@ data Clock
     --   monotonic clock is meaningless (because its origin is arbitrary), and
     --   thus there is no need to set it. Furthermore, realtime applications can
     --   rely on the fact that the value of this clock is never set.
-    --   (same as 'Boottime' since Linux 4.17, see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d6ed449afdb38f89a7b38ec50e367559e1b8f71f)
+    --   (Identical to 'Boottime' since Linux 4.17, see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d6ed449afdb38f89a7b38ec50e367559e1b8f71f)
+    --  @CLOCK_MONOTONIC@ (macOS - @SYSTEM_CLOCK@)
   = Monotonic
 
     -- | The identifier of the system-wide clock measuring real time. For this
     --   clock, the value returned by 'getTime' represents the amount of time (in
     --   seconds and nanoseconds) since the Epoch.
+    -- @CLOCK_REALTIME@ (macOS - @CALENDAR_CLOCK@, Windows - @GetSystemTimeAsFileTime@)
   | Realtime
 
     -- | The identifier of the CPU-time clock associated with the calling
@@ -82,35 +83,40 @@ data Clock
 
 #if defined (CLOCK_MONOTONIC_RAW)
     -- | (since Linux 2.6.28, macOS 10.12)
-    --   Similar to CLOCK_MONOTONIC, but provides access to a
+    --   Similar to 'Monotonic', but provides access to a
     --   raw hardware-based time that is not subject to NTP
     --   adjustments or the incremental adjustments performed by
     --   adjtime(3).
+    --   @CLOCK_MONOTONIC_RAW@ (Windows - @QueryPerformanceCounter@, @QueryPerformanceFrequency@)
   | MonotonicRaw
 #endif
 
 #if defined (CLOCK_BOOTTIME)
     -- | (since Linux 2.6.39; Linux-specific)
-    --   Identical to CLOCK_MONOTONIC, except it also includes
-    --   any time that the system is suspended.  This allows
+    --   Identical to `Monotonic`, except it also includes
+    --   any time that the system is suspended. This allows
     --   applications to get a suspend-aware monotonic clock
-    --   without having to deal with the complications of
-    --   CLOCK_REALTIME, which may have discontinuities if the
-    --   time is changed using settimeofday(2).
+    --   without having to deal with the complications of 'Realtime',
+    --   which may have discontinuities if the time is changed
+    --   using settimeofday(2).
+    --   (since Linux 4.17; identical to 'Monotonic')
+    --   @CLOCK_BOOTTIME@
   | Boottime
 #endif
 
 #if defined (CLOCK_MONOTONIC_COARSE)
     -- | (since Linux 2.6.32; Linux-specific)
-    --   A faster but less precise version of CLOCK_MONOTONIC.
+    --   A faster but less precise version of 'Monotonic'.
     --   Use when you need very fast, but not fine-grained timestamps.
+    --   @CLOCK_MONOTONIC_COARSE@
   | MonotonicCoarse
 #endif
 
 #if defined (CLOCK_REALTIME_COARSE)
     -- | (since Linux 2.6.32; Linux-specific)
-    --   A faster but less precise version of CLOCK_REALTIME.
+    --   A faster but less precise version of 'Realtime'.
     --   Use when you need very fast, but not fine-grained timestamps.
+    --   @CLOCK_REALTIME_COARSE@
   | RealtimeCoarse
 #endif
 
