@@ -81,8 +81,7 @@ data Clock
   | ThreadCPUTime
 
 #if defined (CLOCK_MONOTONIC_RAW)
-    -- | (since Linux 2.6.28)
-    --   (since macOS 10.12)
+    -- | (since Linux 2.6.28, macOS 10.12)
     --   Similar to CLOCK_MONOTONIC, but provides access to a
     --   raw hardware-based time that is not subject to NTP
     --   adjustments or the incremental adjustments performed by
