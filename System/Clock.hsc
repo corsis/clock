@@ -62,6 +62,7 @@ data Clock
     --   monotonic clock is meaningless (because its origin is arbitrary), and
     --   thus there is no need to set it. Furthermore, realtime applications can
     --   rely on the fact that the value of this clock is never set.
+    --   (same as Boottime since Linux 4.3, see https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=d6ed449afdb38f89a7b38ec50e367559e1b8f71f)
   = Monotonic
 
     -- | The identifier of the system-wide clock measuring real time. For this
@@ -80,7 +81,8 @@ data Clock
   | ThreadCPUTime
 
 #if defined (CLOCK_MONOTONIC_RAW)
-    -- | (since Linux 2.6.28; Linux-specific)
+    -- | (since Linux 2.6.28)
+    --   (since macOS 10.12)
     --   Similar to CLOCK_MONOTONIC, but provides access to a
     --   raw hardware-based time that is not subject to NTP
     --   adjustments or the incremental adjustments performed by
