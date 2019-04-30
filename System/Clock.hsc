@@ -245,11 +245,6 @@ instance Num TimeSpec where
                                                ysi     =   toInteger  ys
                                                xni     =   toInteger  xn
                                                yni     =   toInteger  yn
---     let xsi = toInteger xs    -- convert to arbitraty Integer type to avoid int overflow
---         xni = toInteger xn
---         ysi = toInteger ys
---           yni = toInteger yn    -- seconds                 -- nanoseconds
---       in normalize $! TimeSpec (fromInteger $! xsi * ysi) (fromInteger $! (xni * yni + (xni * ysi + xsi * yni) * s2ns) `div` s2ns)
 
   negate (TimeSpec xs xn) = normalize $! TimeSpec (negate xs) (negate xn)
   abs    (normalize -> TimeSpec xs xn) | xs == 0   = normalize $! TimeSpec 0 xn
