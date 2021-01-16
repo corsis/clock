@@ -30,12 +30,8 @@ import GHC.Generics (Generic)
 
 #if defined(_WIN32)
 #  include "hs_clock_win32.c"
-#elif defined(__MACH__) && defined(__APPLE__)
-#  include "hs_clock_darwin.c"
 #else
 #  include <time.h>
--- Due to missing define in FreeBSD 9.0 and 9.1
--- (http://lists.freebsd.org/pipermail/freebsd-stable/2013-September/075095.html).
 #  ifndef CLOCK_PROCESS_CPUTIME_ID
 #    define CLOCK_PROCESS_CPUTIME_ID 15
 #  endif
@@ -131,28 +127,17 @@ foreign import ccall hs_clock_win32_getres_monotonic :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_win32_getres_realtime :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_win32_getres_processtime :: Ptr TimeSpec -> IO ()
 foreign import ccall hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
-#elif defined(__MACH__) && defined(__APPLE__)
-foreign import ccall hs_clock_darwin_gettime :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
-foreign import ccall hs_clock_darwin_getres  :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
 #else
 foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 #endif
 
 #if !defined(_WIN32)
-#if defined(__MACH__) && defined(__APPLE__)
-clockToConst :: Clock -> #{type clock_id_t}
-clockToConst Monotonic = #const SYSTEM_CLOCK
-clockToConst  Realtime = #const CALENDAR_CLOCK
-clockToConst ProcessCPUTime = #const SYSTEM_CLOCK
-clockToConst  ThreadCPUTime = #const SYSTEM_CLOCK
-#else
 clockToConst :: Clock -> #{type clockid_t}
 clockToConst Monotonic = #const CLOCK_MONOTONIC
 clockToConst  Realtime = #const CLOCK_REALTIME
 clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
 clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
-#endif
 
 #if defined (CLOCK_MONOTONIC_RAW)
 clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
@@ -185,8 +170,6 @@ getTime Monotonic = allocaAndPeek hs_clock_win32_gettime_monotonic
 getTime Realtime = allocaAndPeek hs_clock_win32_gettime_realtime
 getTime ProcessCPUTime = allocaAndPeek hs_clock_win32_gettime_processtime
 getTime ThreadCPUTime = allocaAndPeek hs_clock_win32_gettime_threadtime
-#elif defined(__MACH__) && defined(__APPLE__)
-getTime clk = allocaAndPeek $! hs_clock_darwin_gettime $! clockToConst clk
 #else
 getTime clk = allocaAndPeek $! clock_gettime $! clockToConst clk
 #endif
@@ -196,8 +179,6 @@ getRes Monotonic = allocaAndPeek hs_clock_win32_getres_monotonic
 getRes Realtime = allocaAndPeek hs_clock_win32_getres_realtime
 getRes ProcessCPUTime = allocaAndPeek hs_clock_win32_getres_processtime
 getRes ThreadCPUTime = allocaAndPeek hs_clock_win32_getres_threadtime
-#elif defined(__MACH__) && defined(__APPLE__)
-getRes clk = allocaAndPeek $! hs_clock_darwin_getres $! clockToConst clk
 #else
 getRes clk = allocaAndPeek $! clock_getres $! clockToConst clk
 #endif
