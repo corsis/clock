@@ -124,6 +124,8 @@ jobs:
           echo "packages: ${PKGDIR_clock}" >> cabal.project
           echo "package clock" >> cabal.project
           echo "    ghc-options: -Werror=missing-methods" >> cabal.project
+          echo "package tasty" >> cabal.project
+          echo "    flags: -clock" >> cabal.project
           cat >> cabal.project <<EOF
           EOF
           $HCPKG list --simple-output --names-only | perl -ne 'for (split /\s+/) { print "constraints: $_ installed\n" unless /^(clock)$/; }' >> cabal.project.local
