@@ -111,6 +111,11 @@ jobs:
           mkdir -p sdist
           cd source || false
           $CABAL sdist all --output-dir $GITHUB_WORKSPACE/sdist
+      - name: sdist-for-hackage
+        uses: actions/upload-artifact@v2
+        with:
+          name: sdist-for-hackage
+          path: $GITHUB_WORKSPACE/sdist/*.tar.gz
       - name: unpack
         run: |
           mkdir -p unpacked
