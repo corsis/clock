@@ -23,6 +23,7 @@ import Control.Applicative ((<$>), (<*>))
 import Data.Int
 import Data.Word
 import Data.Typeable (Typeable)
+import Foreign.C
 import Foreign.Ptr
 import Foreign.Storable
 import Foreign.Marshal.Alloc
@@ -128,8 +129,8 @@ foreign import ccall unsafe hs_clock_win32_getres_realtime :: Ptr TimeSpec -> IO
 foreign import ccall unsafe hs_clock_win32_getres_processtime :: Ptr TimeSpec -> IO ()
 foreign import ccall unsafe hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
 #else
-foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
-foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
+foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO CInt
+foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO CInt
 #endif
 
 #if !defined(_WIN32)
@@ -171,7 +172,7 @@ getTime Realtime = allocaAndPeek hs_clock_win32_gettime_realtime
 getTime ProcessCPUTime = allocaAndPeek hs_clock_win32_gettime_processtime
 getTime ThreadCPUTime = allocaAndPeek hs_clock_win32_gettime_threadtime
 #else
-getTime clk = allocaAndPeek $! clock_gettime $! clockToConst clk
+getTime clk = allocaAndPeek $! throwErrnoIfMinus1_ "clock_gettime" . clock_gettime (clockToConst clk)
 #endif
 
 #if defined(_WIN32)
@@ -180,7 +181,7 @@ getRes Realtime = allocaAndPeek hs_clock_win32_getres_realtime
 getRes ProcessCPUTime = allocaAndPeek hs_clock_win32_getres_processtime
 getRes ThreadCPUTime = allocaAndPeek hs_clock_win32_getres_threadtime
 #else
-getRes clk = allocaAndPeek $! clock_getres $! clockToConst clk
+getRes clk = allocaAndPeek $! throwErrnoIfMinus1_ "clock_getres" . clock_getres (clockToConst clk)
 #endif
 
 -- | TimeSpec structure
