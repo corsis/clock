@@ -127,9 +127,6 @@ foreign import ccall unsafe hs_clock_win32_getres_monotonic :: Ptr TimeSpec -> I
 foreign import ccall unsafe hs_clock_win32_getres_realtime :: Ptr TimeSpec -> IO ()
 foreign import ccall unsafe hs_clock_win32_getres_processtime :: Ptr TimeSpec -> IO ()
 foreign import ccall unsafe hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
-#elif defined(__MACH__) && defined(__APPLE__)
-foreign import ccall unsafe hs_clock_darwin_gettime :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
-foreign import ccall unsafe hs_clock_darwin_getres  :: #{type clock_id_t} -> Ptr TimeSpec -> IO ()
 #else
 foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
 foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO ()
