@@ -115,7 +115,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: sdist-for-hackage
-          path: $GITHUB_WORKSPACE/sdist/*.tar.gz
+          path: /__w/clock/clock/sdist/clock-*.tar.gz
       - name: unpack
         run: |
           mkdir -p unpacked
