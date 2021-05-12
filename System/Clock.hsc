@@ -20,6 +20,7 @@ module System.Clock
   ) where
 
 import Control.Applicative ((<$>), (<*>))
+import Data.Coerce
 import Data.Int
 import Data.Word
 import Data.Ratio
@@ -283,3 +284,34 @@ diffTimeSpec ts1 ts2 = abs (ts1 - ts2)
 -- | TimeSpec as nano seconds.
 timeSpecAsNanoSecs :: TimeSpec -> Integer
 timeSpecAsNanoSecs   (TimeSpec s n) = toInteger s * s2ns + toInteger n
+
+newtype Seconds = Seconds TimeSpec
+ deriving (Generic, Read, Show, Typeable, Eq, Ord, Storable)
+
+instance Num Seconds where
+  fromInteger n = Seconds $ TimeSpec (fromInteger n) 0
+  Seconds a * Seconds b = Seconds $ a * b `div` s2ns
+  (+) = coerce ((+) :: TimeSpec -> TimeSpec -> TimeSpec)
+  (-) = coerce ((-) :: TimeSpec -> TimeSpec -> TimeSpec)
+  negate = coerce (negate :: TimeSpec -> TimeSpec)
+  abs = coerce (abs :: TimeSpec -> TimeSpec)
+  signum = coerce (signum :: TimeSpec -> TimeSpec)
+
+instance Enum Seconds where
+  succ x = x + 1
+  pred x = x - 1
+  toEnum x = Seconds . normalize $ TimeSpec (fromIntegral x) 0
+  fromEnum (Seconds (TimeSpec s _)) = fromEnum s
+
+instance Real Seconds where
+  toRational (Seconds x) = toInteger x % s2ns
+
+instance Fractional Seconds where
+  fromRational x = Seconds . fromInteger $ floor (x * s2ns)
+  Seconds a / Seconds b = Seconds $ a * s2ns `div` b
+  recip (Seconds a) = Seconds $ s2ns * s2ns `div` a
+
+instance RealFrac Seconds where
+  properFraction (Seconds (TimeSpec s ns))
+    | s >= 0 = (fromIntegral s, Seconds $ TimeSpec 0 ns)
+    | otherwise = (fromIntegral (s+1), Seconds $ TimeSpec (-1) ns)
