@@ -22,6 +22,7 @@ module System.Clock
 import Control.Applicative ((<$>), (<*>))
 import Data.Int
 import Data.Word
+import Data.Ratio
 import Data.Typeable (Typeable)
 import Foreign.C
 import Foreign.Ptr
@@ -44,7 +45,7 @@ import GHC.Generics (Generic)
 
 -- | Clock types. A clock may be system-wide (that is, visible to all processes)
 --   or per-process (measuring time that is meaningful only within a process).
---   All implementations shall support 'Realtime'. 
+--   All implementations shall support 'Realtime'.
 data Clock
 
     -- | The identifier for the system-wide monotonic clock, which is defined as
@@ -227,20 +228,33 @@ normalize (TimeSpec xs xn) | xn < 0 || xn >= s2ns = TimeSpec (xs + q)  r
 instance Num TimeSpec where
   (TimeSpec xs xn) + (TimeSpec ys yn) = normalize $! TimeSpec (xs + ys) (xn + yn)
   (TimeSpec xs xn) - (TimeSpec ys yn) = normalize $! TimeSpec (xs - ys) (xn - yn)
-  (TimeSpec xs xn) * (TimeSpec ys yn) = normalize $! TimeSpec (xsi_ysi) (xni_yni)
-                                         where xsi_ysi = fromInteger $!  xsi*ysi 
-                                               xni_yni = fromInteger $! (xni*yni + (xni*ysi + xsi*yni) * s2ns) `div` s2ns
-                                               xsi     =   toInteger  xs
-                                               ysi     =   toInteger  ys
-                                               xni     =   toInteger  xn
-                                               yni     =   toInteger  yn
-
+  (toInteger-> t1) * (toInteger-> t2) = fromInteger $! t1 * t2
   negate (TimeSpec xs xn) = normalize $! TimeSpec (negate xs) (negate xn)
   abs    (normalize -> TimeSpec xs xn) | xs == 0   = normalize $! TimeSpec 0 xn
                                        | otherwise = normalize $! TimeSpec (abs xs) (signum xs * xn)
   signum (normalize -> TimeSpec xs xn) | xs == 0   = TimeSpec (signum xn) 0
                                        | otherwise = TimeSpec (signum xs) 0
   fromInteger x = TimeSpec (fromInteger q) (fromInteger r) where (q, r) = x `divMod` s2ns
+
+instance Enum TimeSpec where
+  succ x = x + 1
+  pred x = x - 1
+  toEnum x = normalize $ TimeSpec 0 (fromIntegral x)
+  fromEnum = fromEnum . toInteger
+
+instance Real TimeSpec where
+  toRational x = toInteger x % 1
+
+instance Integral TimeSpec where
+  toInteger = toNanoSecs
+  quot (toInteger-> t1) (toInteger-> t2) = fromInteger $! quot t1 t2
+  rem (toInteger-> t1) (toInteger-> t2) = fromInteger $! rem t1 t2
+  div (toInteger-> t1) (toInteger-> t2) = fromInteger $! div t1 t2
+  mod (toInteger-> t1) (toInteger-> t2) = fromInteger $! mod t1 t2
+  divMod (toInteger-> t1) (toInteger-> t2) =
+    let (q,r)=divMod t1 t2 in (fromInteger $! q, fromInteger $! r)
+  quotRem (toInteger-> t1) (toInteger-> t2) =
+    let (q,r)=quotRem t1 t2 in (fromInteger $! q, fromInteger $! r)
 
 instance Eq TimeSpec where
   (normalize -> TimeSpec xs xn) == (normalize -> TimeSpec ys yn) | True == es = xn == yn
