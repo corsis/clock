@@ -76,6 +76,7 @@ library
                          ForeignFunctionInterface
                          ScopedTypeVariables
                          ViewPatterns
+                         GeneralizedNewtypeDeriving
     if os(windows)
       c-sources:         cbits/hs_clock_win32.c
     include-dirs:        cbits
