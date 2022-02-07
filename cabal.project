@@ -1,0 +1,6 @@
+packages: .
+
+-- Andreas Abel, 2022-02-07, issue #72: Fix cyclic dependencies.
+-- The default would be tasty +clock, but this creates a dependency cycle.
+constraints:
+  tasty -clock
