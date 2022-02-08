@@ -71,6 +71,7 @@ library
       build-depends:     ghc-prim
     build-depends:       base >= 4.4 && < 5
     exposed-modules:     System.Clock
+                        System.Clock.Seconds
     default-extensions:          DeriveGeneric
                          DeriveDataTypeable
                          ForeignFunctionInterface
@@ -88,6 +89,9 @@ library
 
 test-suite test
     default-language: Haskell2010
+    default-extensions: ScopedTypeVariables
+                         GeneralizedNewtypeDeriving
+                         StandaloneDeriving
     type:
       exitcode-stdio-1.0
     hs-source-dirs:
