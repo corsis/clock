@@ -192,6 +192,11 @@ jobs:
         run: |
           mkdir -p sdist
           $CABAL sdist all --output-dir $GITHUB_WORKSPACE/sdist
+      -name: sdist upload for hackage
+        uses: actions/upload-artifact@v2
+        with:
+          name: hackage-sdist
+          path: $GITHUB_WORKSPACE/sdist
       - name: unpack
         run: |
           mkdir -p unpacked
