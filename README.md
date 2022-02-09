@@ -1,5 +1,8 @@
 Clock
 
+* https://hackage.haskell.org/package/clock
+* https://hackage.haskell.org/package/clock/docs/System-Clock.html
+
 ----
 
 ## Contact
