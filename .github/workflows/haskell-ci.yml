@@ -16,13 +16,10 @@ name: Haskell-CI
 on:
   - push
   - pull_request
-defaults:
-  run:
-    working-directory: ghx  
 jobs:
   linux:
     name: Haskell-CI - Linux - ${{ matrix.compiler }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     timeout-minutes:
       60
     container:
@@ -195,11 +192,14 @@ jobs:
         run: |
           mkdir -p sdist
           $CABAL sdist all --output-dir $GITHUB_WORKSPACE/sdist
+      - name: sdist for hackage
+        run: |
+          $CABAL sdist all --output-dir /tmp/sdist
       - name: sdist upload for hackage
         uses: actions/upload-artifact@v2
         with:
           name: hackage-sdist
-          path: ghx/$GITHUB_WORKSPACE/sdist
+          path: /tmp/sdist
       - name: unpack
         run: |
           mkdir -p unpacked
