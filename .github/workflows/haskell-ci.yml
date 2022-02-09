@@ -17,7 +17,8 @@ on:
   - push
   - pull_request
 defaults:
-  working-directory: ghx  
+  run:
+    working-directory: ghx  
 jobs:
   linux:
     name: Haskell-CI - Linux - ${{ matrix.compiler }}
