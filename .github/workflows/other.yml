@@ -1,0 +1,30 @@
+on:
+  push:
+  pull_request:
+jobs:
+  wasi:
+    runs-on: ubuntu-latest
+    env:
+      GHC_WASM_META_REV: 5a5c10c3b7e2f9f55bb2f40601cb20c9eb599bb5
+      FLAVOUR: '9.6'
+    steps:
+    - name: Setup WASI GHC
+      run: |
+        cd $(mktemp -d)
+        curl -L --retry 5 https://gitlab.haskell.org/ghc/ghc-wasm-meta/-/archive/$GHC_WASM_META_REV/ghc-wasm-meta-master.tar.gz | tar xz --strip-components=1
+        ./setup.sh
+        ~/.ghc-wasm/add_to_github_path.sh
+    - uses: actions/checkout@v3
+
+    - uses: actions/cache@v3
+      with:
+        path: |
+          ~/.ghc-wasm/.cabal/store
+          dist-newstyle
+        key: build-wasi-${{ runner.os }}-wasm-meta-${{ env.GHC_WASM_META_REV }}-flavour-${{ env.FLAVOUR }}-${{ github.sha }}
+        restore-keys: |
+          build-wasi-${{ runner.os }}-wasm-meta-${{ env.GHC_WASM_META_REV }}-flavour-${{ env.FLAVOUR }}-
+
+    - name: Build
+      run: |
+        wasm32-wasi-cabal build
