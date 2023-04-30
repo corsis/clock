@@ -34,10 +34,15 @@ import GHC.Generics (Generic)
 
 #if defined(_WIN32)
 #  include "hs_clock_win32.c"
+#  define HS_CLOCK_HAVE_PROCESS_CPUTIME
+#  define HS_CLOCK_HAVE_THREAD_CPUTIME
 #else
 #  include <time.h>
-#  ifndef CLOCK_PROCESS_CPUTIME_ID
-#    define CLOCK_PROCESS_CPUTIME_ID 15
+#  ifdef CLOCK_PROCESS_CPUTIME_ID
+#    define HS_CLOCK_HAVE_PROCESS_CPUTIME
+#  endif
+#  ifdef CLOCK_THREAD_CPUTIME_ID
+#    define HS_CLOCK_HAVE_THREAD_CPUTIME
 #  endif
 #endif
 
@@ -71,15 +76,19 @@ data Clock
     -- @CLOCK_REALTIME@ (macOS - @CALENDAR_CLOCK@, Windows - @GetSystemTimeAsFileTime@)
   | Realtime
 
+#ifdef HS_CLOCK_HAVE_PROCESS_CPUTIME
     -- | The identifier of the CPU-time clock associated with the calling
     --   process. For this clock, the value returned by 'getTime' represents the
     --   amount of execution time of the current process.
   | ProcessCPUTime
+#endif
 
+#ifdef HS_CLOCK_HAVE_THREAD_CPUTIME
     -- | The identifier of the CPU-time clock associated with the calling OS
     --   thread. For this clock, the value returned by 'getTime' represents the
     --   amount of execution time of the current OS thread.
   | ThreadCPUTime
+#endif
 
 #if defined (CLOCK_MONOTONIC_RAW)
     -- | (since Linux 2.6.28, macOS 10.12)
@@ -140,9 +149,12 @@ foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -
 clockToConst :: Clock -> #{type clockid_t}
 clockToConst Monotonic = #const CLOCK_MONOTONIC
 clockToConst  Realtime = #const CLOCK_REALTIME
+#if defined (CLOCK_PROCESS_CPUTIME_ID)
 clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
+#endif
+#if defined (CLOCK_THREAD_CPUTIME_ID)
 clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
-
+#endif
 #if defined (CLOCK_MONOTONIC_RAW)
 clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
 #endif
