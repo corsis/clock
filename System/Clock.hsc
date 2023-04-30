@@ -3,6 +3,7 @@
 --   1003.1-2008: <http://www.opengroup.org/onlinepubs/9699919799/>,
 --   <http://www.opengroup.org/onlinepubs/9699919799/functions/clock_getres.html#>
 
+{-# LANGUAGE CApiFFI #-}
 {-# OPTIONS_GHC -fno-warn-type-defaults #-}
 -- To allow importing Data.Int and Data.Word indiscriminately on all platforms,
 -- since we can't systematically predict what typedef's expand to.
@@ -44,6 +45,7 @@ import GHC.Generics (Generic)
 #  ifdef CLOCK_THREAD_CPUTIME_ID
 #    define HS_CLOCK_HAVE_THREAD_CPUTIME
 #  endif
+import System.Posix.Types
 #endif
 
 #if __GLASGOW_HASKELL__ < 800
@@ -141,31 +143,58 @@ foreign import ccall unsafe hs_clock_win32_getres_realtime :: Ptr TimeSpec -> IO
 foreign import ccall unsafe hs_clock_win32_getres_processtime :: Ptr TimeSpec -> IO ()
 foreign import ccall unsafe hs_clock_win32_getres_threadtime :: Ptr TimeSpec -> IO ()
 #else
-foreign import ccall unsafe clock_gettime :: #{type clockid_t} -> Ptr TimeSpec -> IO CInt
-foreign import ccall unsafe clock_getres  :: #{type clockid_t} -> Ptr TimeSpec -> IO CInt
+#if MIN_VERSION_base(4,10,0)
+type ClockId = CClockId
+#else
+type ClockId = #{type clockid_t}
+#endif
+
+foreign import ccall unsafe clock_gettime :: ClockId -> Ptr TimeSpec -> IO CInt
+foreign import ccall unsafe clock_getres  :: ClockId -> Ptr TimeSpec -> IO CInt
+
+foreign import capi unsafe "time.h value CLOCK_MONOTONIC" clock_MONOTONIC :: ClockId
+foreign import capi unsafe "time.h value CLOCK_REALTIME" clock_REALTIME :: ClockId
+#if defined (CLOCK_PROCESS_CPUTIME_ID)
+foreign import capi unsafe "time.h value CLOCK_PROCESS_CPUTIME_ID" clock_PROCESS_CPUTIME_ID :: ClockId
+#endif
+#if defined (CLOCK_THREAD_CPUTIME_ID)
+foreign import capi unsafe "time.h value CLOCK_THREAD_CPUTIME_ID" clock_THREAD_CPUTIME_ID :: ClockId
+#endif
+#if defined (CLOCK_MONOTONIC_RAW)
+foreign import capi unsafe "time.h value CLOCK_MONOTONIC_RAW" clock_MONOTONIC_RAW :: ClockId
+#endif
+#if defined (CLOCK_BOOTTIME)
+foreign import capi unsafe "time.h value CLOCK_BOOTTIME" clock_BOOTTIME :: ClockId
+#endif
+#if defined (CLOCK_MONOTONIC_COARSE)
+foreign import capi unsafe "time.h value CLOCK_MONOTONIC_COARSE" clock_MONOTONIC_COARSE :: ClockId
+#endif
+#if defined (CLOCK_REALTIME_COARSE)
+foreign import capi unsafe "time.h value CLOCK_REALTIME_COARSE" clock_REALTIME_COARSE :: ClockId
+#endif
 #endif
 
 #if !defined(_WIN32)
-clockToConst :: Clock -> #{type clockid_t}
-clockToConst Monotonic = #const CLOCK_MONOTONIC
-clockToConst  Realtime = #const CLOCK_REALTIME
+clockToConst :: Clock -> ClockId
+clockToConst Monotonic = clock_MONOTONIC
+clockToConst  Realtime = clock_REALTIME
 #if defined (CLOCK_PROCESS_CPUTIME_ID)
-clockToConst ProcessCPUTime = #const CLOCK_PROCESS_CPUTIME_ID
+clockToConst ProcessCPUTime = clock_PROCESS_CPUTIME_ID
 #endif
 #if defined (CLOCK_THREAD_CPUTIME_ID)
-clockToConst  ThreadCPUTime = #const CLOCK_THREAD_CPUTIME_ID
+clockToConst  ThreadCPUTime = clock_THREAD_CPUTIME_ID
 #endif
 #if defined (CLOCK_MONOTONIC_RAW)
-clockToConst    MonotonicRaw = #const CLOCK_MONOTONIC_RAW
+clockToConst    MonotonicRaw = clock_MONOTONIC_RAW
 #endif
 #if defined (CLOCK_BOOTTIME)
-clockToConst        Boottime = #const CLOCK_BOOTTIME
+clockToConst        Boottime = clock_BOOTTIME
 #endif
 #if defined (CLOCK_MONOTONIC_COARSE)
-clockToConst MonotonicCoarse = #const CLOCK_MONOTONIC_COARSE
+clockToConst MonotonicCoarse = clock_MONOTONIC_COARSE
 #endif
 #if defined (CLOCK_REALTIME_COARSE)
-clockToConst  RealtimeCoarse = #const CLOCK_REALTIME_COARSE
+clockToConst  RealtimeCoarse = clock_REALTIME_COARSE
 #endif
 #endif
 
