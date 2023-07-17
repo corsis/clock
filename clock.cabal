@@ -1,6 +1,6 @@
 cabal-version: >= 1.10
 name:          clock
-version:       0.8.3
+version:       0.8.4
 stability:     stable
 synopsis:      High-resolution clock functions: monotonic, realtime, cputime.
 description:   A package for convenient access to high-resolution clock and
@@ -43,11 +43,11 @@ description:   A package for convenient access to high-resolution clock and
                .
                * @PackagingOnly@ changes are made for quality assurance reasons.
 
-copyright:     Copyright © Cetin Sert 2009-2016, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014 2015, Chris Done 2015, Dimitri Sabadie 2015, Christian Burger 2015, Mario Longobardi 2016, Alexander Vershilov 2021.
+copyright:     Copyright © Cetin Sert 2009-2023, Eugene Kirpichov 2010, Finn Espen Gundersen 2013, Gerolf Seitz 2013, Mathieu Boespflug 2014 2015, Chris Done 2015, Dimitri Sabadie 2015, Christian Burger 2015, Mario Longobardi 2016, Alexander Vershilov 2021.
 license:       BSD3
 license-file:  LICENSE
-author:        Cetin Sert <cetin@sert.works>, Corsis Research
-maintainer:    Cetin Sert <cetin@sert.works>, Corsis Research
+author:        Cetin Sert <cetin@elefunc.com>, Elefunc, Inc.
+maintainer:    Cetin Sert <cetin@elefunc.com>, Elefunc, Inc.
 homepage:      https://github.com/corsis/clock
 bug-reports:   https://github.com/corsis/clock/issues
 category:      System
