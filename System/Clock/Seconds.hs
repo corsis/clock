@@ -50,7 +50,7 @@ instance Fractional Seconds where
 
 instance RealFrac Seconds where
   properFraction (Seconds (TimeSpec s ns))
-    | s >= 0 = (fromIntegral s, Seconds $ TimeSpec 0 ns)
+    | s >= 0 || ns == 0 = (fromIntegral s, Seconds $ TimeSpec 0 ns)
     | otherwise = (fromIntegral (s+1), Seconds $ TimeSpec (-1) ns)
 
 -- | The 'getTime' function shall return the current value for the
