@@ -4,3 +4,8 @@ packages: .
 -- The default would be tasty +clock, but this creates a dependency cycle.
 constraints:
   tasty -clock
+
+-- otherwise, we get CI failures
+if impl(ghc ==8.2.*)
+  package text
+    flags: -simdutf
